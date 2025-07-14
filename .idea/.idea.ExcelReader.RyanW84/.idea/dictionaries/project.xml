@@ -2,6 +2,8 @@
   <dictionary name="project">
     <words>
       <w>llocaldb</w>
+      <w>mssqllocaldb</w>
+      <w>ryanw</w>
     </words>
   </dictionary>
 </component>

@@ -1,15 +1,10 @@
-﻿using ExcelReader.RyanW84;
+﻿using ExcelReader.RyanW84.Data;
+using ExcelReader.RyanW84.Controller;
 
-builder.Services.AddDbContext<ExcelReaderDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+var context = new ExcelReaderDbContext();
+context.Database.EnsureDeleted();
+context.Database.EnsureCreated();
 
+ExcelBeginnerController excelBeginnerController = new();
+excelBeginnerController.AddDataFromExcel();
 
-if (app.Environment.IsDevelopment())
-{
-    Console.WriteLine("Development Mode");
-
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ShiftsLoggerV2.RyanW84.Data.ShiftsLoggerDbContext>();
-    dbContext.Database.EnsureDeleted();
-    dbContext.Database.EnsureCreated();
-}
