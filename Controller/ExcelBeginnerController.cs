@@ -11,7 +11,7 @@ public class ExcelBeginnerController
         using var db = new ExcelReaderDbContext();
 
         var excelBeginners = ExcelBeginnerService.ReadExcelFile();
-        db.Add(excelBeginners);
+        db.AddRange(excelBeginners);
         db.SaveChanges();
     }
 }
