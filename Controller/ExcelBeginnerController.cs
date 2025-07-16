@@ -10,7 +10,7 @@ public class ExcelBeginnerController
     {
         using var db = new ExcelReaderDbContext();
 
-        var excelBeginners = ExcelBeginnerService.ReadExcelFile();
+        var excelBeginners = ExcelBeginnerService.ReadFromExcel();
         db.AddRange(excelBeginners);
         db.SaveChanges();
     }
