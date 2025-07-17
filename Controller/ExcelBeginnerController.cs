@@ -6,11 +6,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class ExcelBeginnerController(IConfiguration configuration)
+public class ExcelBeginnerController(IConfiguration configuration, ExcelReaderDbContext dbContext)
 {
+    private readonly IConfiguration _configuration = configuration;
+
+    // Inject both IConfiguration and ExcelReaderDbContext
+
     public void AddDataFromExcel()
     {
-        using var db = new ExcelReaderDbContext();
+        // Use the injected dbContext directly
+        using var db = dbContext;
 
         // Get the Excel package and read the data
         var excelPackage = ExcelBeginnerService.ExcelPackage();

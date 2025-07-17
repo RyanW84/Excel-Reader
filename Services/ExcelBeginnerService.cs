@@ -12,6 +12,7 @@ public static class ExcelBeginnerService
             @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelBeginner.xlsx";
         var file = new FileInfo(filePath);
 
+        Console.WriteLine($"Reading from a fixed table");
         Console.WriteLine($"Reading Excel file: {filePath}");
 
         // Check if the file exists
@@ -40,6 +41,7 @@ public static class ExcelBeginnerService
             //Get column details
             if (!string.IsNullOrEmpty(firstRowCell.Text))
             {
+                Console.WriteLine($"Getting Colums:  {firstRowCell.Text}");
                 var firstColumn = $"Column {firstRowCell.Start.Column}";
                 excelAsTable.Columns.Add(hasHeader ? firstRowCell.Text : firstColumn);
             }
@@ -48,9 +50,11 @@ public static class ExcelBeginnerService
         //Get row details
         for (var rowNum = startRow; rowNum <= worksheet.Dimension.End.Row; rowNum++)
         {
+           
             var wsRow = worksheet.Cells[rowNum, 1, rowNum, excelAsTable.Columns.Count];
             var row = excelAsTable.Rows.Add();
-            foreach (var cell in wsRow) row[cell.Start.Column - 1] = cell.Text;
+            Console.WriteLine($"Getting Rows:  {wsRow}");
+            foreach (var cell in wsRow) row[cell.Start.Column -1] = cell.Text;
         }
 
         return excelAsTable;

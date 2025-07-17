@@ -6,12 +6,10 @@ namespace ExcelReader.RyanW84.Services;
 
 public class AnyExcelRead(IConfiguration configuration)
 {
-    //private readonly ExcelReaderDbContext _context;
-
-    // _context = new ExcelReaderDbContext(connectionString);
-
-    public DataTable ReadFromExcel(string filePath)
+    public DataTable ReadFromExcel()
     {
+        bool HasHeader = true;
+        string filePath =  @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelBeginner.xlsx";
         ExcelPackage.License.SetNonCommercialPersonal("Ryan Weavers");
         using var package = new ExcelPackage(new FileInfo(filePath));
         var worksheet = package.Workbook.Worksheets[0]; // Get first worksheet
@@ -81,4 +79,5 @@ public class AnyExcelRead(IConfiguration configuration)
         dataTable.TableName = worksheet.Name;
         return dataTable;
     }
+
 }

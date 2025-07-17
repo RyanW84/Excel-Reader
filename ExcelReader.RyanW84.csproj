@@ -8,7 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ClosedXml.Generic" Version="1.0.4" />
       <PackageReference Include="EntityFramework" Version="6.5.1" />
       <PackageReference Include="EPPlus" Version="8.0.7" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
@@ -24,6 +23,12 @@
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
