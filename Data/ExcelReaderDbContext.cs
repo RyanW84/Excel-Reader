@@ -1,33 +1,24 @@
 using ExcelReader.RyanW84.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 
 namespace ExcelReader.RyanW84.Data;
 
-internal class ExcelReaderDbContext : DbContext
+public class ExcelReaderDbContext() : DbContext
 {
+    private DbContextOptions<ExcelReaderDbContext> ConnectionString { get; } 
     public DbSet<ExcelBeginner> ExcelBeginner { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        optionsBuilder
-            .UseSqlServer(
-                @"Server=(localdb)\MSSQLlocaldb; Database = ExcelReaderDB; initial Catalog=ExcelReaderDB; Integrated Security=True; TrustServerCertificate=True;"
-            )
-            .EnableSensitiveDataLogging()
-            .UseLoggerFactory(GetLoggerFactory());
-    }
 
     private static ILoggerFactory GetLoggerFactory()
     {
         var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder.AddConsole();
-            builder.AddFilter(
-                (category, level) =>
-                    category == DbLoggerCategory.Database.Command.Name
-                    && level == LogLevel.Information
+            builder.AddFilter((category, level) =>
+                category == DbLoggerCategory.Database.Command.Name
+                && level == LogLevel.Information
             );
         });
         return loggerFactory;
@@ -38,7 +29,7 @@ internal class ExcelReaderDbContext : DbContext
         modelBuilder
             .Entity<ExcelBeginner>()
             .HasData(
-                new List<ExcelBeginner>()
+                new List<ExcelBeginner>
                 {
                     new()
                     {
@@ -66,8 +57,23 @@ internal class ExcelReaderDbContext : DbContext
                         sex = "NA",
                         colour = "NA",
                         height = "F300"
-                    },
+                    }
                 }
             );
+    }
+
+    public class ExcelDbContextFactory : IDesignTimeDbContextFactory<ExcelReaderDbContext>
+    {
+        public ExcelReaderDbContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<ExcelReaderDbContext>();
+            optionsBuilder.UseSqlServer(
+                "Server=(localdb)\\MSSQLlocaldb; Database = ExcelReader; initial Catalog =ExcelReader; integrated security = True;MultipleActiveResultSets=True; ");
+            optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.UseLoggerFactory(GetLoggerFactory());
+            // TODO: optionsBuilder.Add
+
+            return new ExcelReaderDbContext();
+        }
     }
 }
