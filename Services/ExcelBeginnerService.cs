@@ -41,7 +41,7 @@ public static class ExcelBeginnerService
             //Get column details
             if (!string.IsNullOrEmpty(firstRowCell.Text))
             {
-                Console.WriteLine($"Getting Colums:  {firstRowCell.Text}");
+                Console.WriteLine($"Getting Columns:  {firstRowCell.Text}");
                 var firstColumn = $"Column {firstRowCell.Start.Column}";
                 excelAsTable.Columns.Add(hasHeader ? firstRowCell.Text : firstColumn);
             }
