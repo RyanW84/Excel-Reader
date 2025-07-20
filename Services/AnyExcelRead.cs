@@ -6,6 +6,7 @@ namespace ExcelReader.RyanW84.Services;
 
 public class AnyExcelRead(IConfiguration configuration)
 {
+    private readonly IConfiguration _configuration = configuration;
     public DataTable ReadFromExcel()
     {
         const string filePath =

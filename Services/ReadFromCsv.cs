@@ -7,35 +7,34 @@ namespace ExcelReader.RyanW84.Services;
 
 public class ReadFromCsv(IConfiguration configuration)
 {
+    private readonly IConfiguration _configuration = configuration;
+
     public List<string[]> ReadCsvFile()
     {
         string filePath =
-            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelCSV.csv";
+            _configuration["CsvFilePath"]
+            ?? @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelCSV.csv";
         Console.WriteLine($"opening {filePath}");
 
         ExcelPackage.License.SetNonCommercialPersonal("Ryan Weavers");
 
         var csvData = new List<string[]>();
 
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("CSV file not found.");
+            return csvData;
+        }
+
         using var package = new ExcelPackage();
         using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
         using var reader = new StreamReader(stream);
-        var csvContent = reader.ReadToEnd();
+        var csvContent = string.Empty;
 
-        // Load CSV into worksheet
-        var worksheet = package.Workbook.Worksheets.Add("CSV");
-        worksheet.Cells.LoadFromText(csvContent);
-
-        var rowCount = worksheet.Dimension.Rows;
-        var colCount = worksheet.Dimension.Columns;
-
-        for (var row = 1; row <= rowCount; row++)
+        string? line;
+        while ((line = reader.ReadLine()) != null)
         {
-            var rowData = new string[colCount];
-            for (var col = 1; col <= colCount; col++)
-            {
-                rowData[col - 1] = worksheet.Cells[row, col].Text;
-            }
+            var rowData = line.Split(','); // Adjust for your delimiter and quoted values if needed
             csvData.Add(rowData);
         }
 
