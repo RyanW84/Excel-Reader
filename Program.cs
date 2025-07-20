@@ -60,6 +60,19 @@ namespace ExcelReader.RyanW84
                 var context = scope.ServiceProvider.GetRequiredService<ExcelReaderDbContext>();
                 context.SaveChanges();
             }
-        }
+
+			using (var scope = services.CreateScope())
+			{
+				var anyExcelRead = scope.ServiceProvider.GetRequiredService<ReadFromCsv>();
+                var dataTable = ReadFromCsv.
+
+				var createTableFromAnyExcel = scope.ServiceProvider.GetRequiredService<CreateTableFromAnyExcel>();
+				createTableFromAnyExcel.CreateTableFromExcel(dataTable);
+
+				// Save changes to the new context
+				var context = scope.ServiceProvider.GetRequiredService<ExcelReaderDbContext>();
+				context.SaveChanges();
+			}
+		}
     }
 }

@@ -12,11 +12,11 @@ public class CreateTableFromAnyExcel(IConfiguration configuration)
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         using var connection = new SqlConnection(connectionString);
         connection.Open();
-        var sqlScript = $"CREATE TABLE {tableName} (\n";
+        var sqlScript = $"CREATE TABLE [{tableName}] (\n";
         foreach (DataColumn column in dataTable.Columns)
         {
             var sqlDataType = GetSqlDataType(column.DataType);
-            sqlScript += $"    {column.ColumnName} {sqlDataType},\n";
+            sqlScript += $"[{column.ColumnName}] {sqlDataType},\n";
         }
 
         sqlScript = sqlScript.Remove(sqlScript.Length - 2);

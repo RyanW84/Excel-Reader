@@ -1,6 +1,4 @@
 using System.Data;
-
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 
@@ -10,10 +8,11 @@ public class AnyExcelRead(IConfiguration configuration)
 {
     public DataTable ReadFromExcel()
     {
-        bool HasHeader = true;
+        var HasHeader = true;
+        
+        Console.WriteLine($"\nReading from a dynamic table");
 
-        string filePath =
-            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelBeginnerDynamic.xlsx";
+        const string filePath = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx";
         Console.WriteLine($"opening {filePath}");
 
         ExcelPackage.License.SetNonCommercialPersonal("Ryan Weavers");
@@ -27,14 +26,15 @@ public class AnyExcelRead(IConfiguration configuration)
         for (var columns = 1; columns <= worksheet.Dimension.Columns; columns++)
         {
             var readColumn = dataTable.Columns.Add(worksheet.Cells[1, columns].Text);
-            var typeDetected = false;
+            var typeDetected = false; 
+            Console.WriteLine($"column added: {readColumn.ColumnName}");
 
             foreach (var cell in worksheet.Cells[2, columns, worksheet.Dimension.Rows, columns])
                 if (!string.IsNullOrEmpty(cell.Text))
                 {
                     if (DateTime.TryParse(cell.Text, out _))
                     {
-                        Console.WriteLine($"Detected DateTime Data Type");
+                        Console.WriteLine("Detected DateTime Data Type");
                         readColumn.DataType = typeof(DateTime);
                         typeDetected = true;
                         break;
@@ -42,7 +42,7 @@ public class AnyExcelRead(IConfiguration configuration)
 
                     if (double.TryParse(cell.Text, out _))
                     {
-                        Console.WriteLine($"Detected \"Double\" Data type");
+                        Console.WriteLine("Detected \"Double\" Data type");
                         readColumn.DataType = typeof(double);
                         typeDetected = true;
                         break;
@@ -50,20 +50,20 @@ public class AnyExcelRead(IConfiguration configuration)
 
                     if (int.TryParse(cell.Text, out _))
                     {
-						Console.WriteLine($"Detected \"Int\" Data type");
-						readColumn.DataType = typeof(int);
+                        Console.WriteLine("Detected \"Int\" Data type");
+                        readColumn.DataType = typeof(int);
                         typeDetected = true;
                     }
                     else if (float.TryParse(cell.Text, out _))
                     {
-						Console.WriteLine($"Detected \"Float\" Data type");
-						readColumn.DataType = typeof(float);
+                        Console.WriteLine("Detected \"Float\" Data type");
+                        readColumn.DataType = typeof(float);
                         typeDetected = true;
                     }
                     else if (bool.TryParse(cell.Text, out _))
                     {
-						Console.WriteLine($"Detected \"Bool\" Data type");
-						readColumn.DataType = typeof(bool);
+                        Console.WriteLine("Detected \"Bool\" Data type");
+                        readColumn.DataType = typeof(bool);
                         typeDetected = true;
                     }
                 }
@@ -71,25 +71,23 @@ public class AnyExcelRead(IConfiguration configuration)
             // If no other type was detected, set it to string
             if (typeDetected is not true)
             {
-				Console.WriteLine($"Type not detected, defaulting to string");
-				readColumn.DataType = typeof(string);
+                Console.WriteLine("Type not detected, defaulting to string");
+                readColumn.DataType = typeof(string);
             }
         }
 
         // Populate DataTable with Excel data
         for (var row = 2; row <= worksheet.Dimension.Rows; row++)
         {
-			Console.WriteLine($"Row added: {row} ");
-			var dataRow = dataTable.NewRow();
+            Console.WriteLine($"Row added: {row} ");
+            var dataRow = dataTable.NewRow();
             for (var col = 1; col <= worksheet.Dimension.Columns; col++)
             {
-				 ");
-				var cellValue = worksheet.Cells[row, col].Text;
+                var cellValue = worksheet.Cells[row, col].Text;
                 dataRow[col - 1] = Convert.ChangeType(
                     cellValue,
-                    dataTable.Columns[col - 1].DataType
-                    Console.WriteLine($"{dataTable.Column}");
-                );
+                    dataTable.Columns[col - 1].DataType);
+                Console.WriteLine($"Cell value: {cellValue} ");
             }
 
             dataTable.Rows.Add(dataRow);
