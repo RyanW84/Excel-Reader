@@ -24,6 +24,7 @@ namespace ExcelReader.RyanW84
                         var connectionString = hostContext.Configuration.GetConnectionString(
                             "DefaultConnection"
                         );
+                        Console.WriteLine($"Connection String: {connectionString}");
 
                         services.AddDbContext<ExcelReaderDbContext>(options =>
                             options.UseSqlServer(connectionString)

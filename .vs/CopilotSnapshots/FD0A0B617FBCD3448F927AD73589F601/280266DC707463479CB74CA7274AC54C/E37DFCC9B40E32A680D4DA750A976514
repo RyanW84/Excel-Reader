@@ -1,4 +1,4 @@
-using ExcelReader.RyanW84.Data;
+﻿using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -12,15 +12,17 @@ public class AnyExcelReadController(IConfiguration configuration, ExcelReaderDbC
 
     public void AddDataFromExcel()
     {
-        Console.WriteLine("\nStarting AnyExcel import...");
+        // Use the injected dbContext directly
+        Console.WriteLine("opening DB Context");
         using var db = dbContext;
+        
+        Console.WriteLine("Reading from Dynamic Excel Spreadsheet");
         var anyExcelRead = new AnyExcelRead(_configuration);
+        
+        Console.WriteLine("Creating Table");
         var dataTable = anyExcelRead.ReadFromExcel();
-        Console.WriteLine($"Read {dataTable.Rows.Count} Rows from dynamic Excel sheet.");
-		Console.WriteLine($"Read {dataTable.Columns.Count} Columns from dynamic Excel sheet.");
-		var createTableFromAnyExcel = new CreateTableFromAnyExcel(_configuration);
+        var createTableFromAnyExcel = new CreateTableFromAnyExcel(_configuration);
         createTableFromAnyExcel.CreateTableFromExcel(dataTable);
         db.SaveChanges();
-        Console.WriteLine("AnyExcel import complete.");
     }
 }

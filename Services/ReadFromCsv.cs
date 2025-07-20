@@ -1,53 +1,66 @@
-﻿using OfficeOpenXml;
-
-using System.Data;
+﻿using System.Data;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using OfficeOpenXml;
 
 namespace ExcelReader.RyanW84.Services;
-public class ReadFromCsv
+
+public class ReadFromCsv(IConfiguration configuration)
 {
-	public List<string[]> ReadCsvFile( )
-	{
-		string filePath = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelCSV.xlsx";
-		var excelPackage = new ExcelPackage(new FileInfo(filePath));
-		var worksheet = excelPackage.Workbook.Worksheets.First();
-		var rowCount = worksheet.Dimension.Rows;
-		var colCount = worksheet.Dimension.Columns;
-		var csvData = new List<string[]>();
+    public List<string[]> ReadCsvFile()
+    {
+        string filePath =
+            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelCSV.csv";
+        Console.WriteLine($"opening {filePath}");
 
-		for (var row = 1; row <= rowCount; row++)
-		{
-			var rowData = new string[colCount];
+        ExcelPackage.License.SetNonCommercialPersonal("Ryan Weavers");
 
-			for (var col = 1; col <= colCount; col++)
-			{
-				rowData[col - 1] = worksheet.Cells[row , col].Text;
-			}
+        var csvData = new List<string[]>();
 
-			csvData.Add(rowData);
-		}
+        using var package = new ExcelPackage();
+        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        using var reader = new StreamReader(stream);
+        var csvContent = reader.ReadToEnd();
 
-		return csvData;
-	}
+        // Load CSV into worksheet
+        var worksheet = package.Workbook.Worksheets.Add("CSV");
+        worksheet.Cells.LoadFromText(csvContent);
 
-	public DataTable ConvertToDataTable(List<string[]> csvData)
-	{
-		var dataTable = new DataTable();
+        var rowCount = worksheet.Dimension.Rows;
+        var colCount = worksheet.Dimension.Columns;
 
-		if (csvData == null || csvData.Count == 0)
-			return dataTable;
+        for (var row = 1; row <= rowCount; row++)
+        {
+            var rowData = new string[colCount];
+            for (var col = 1; col <= colCount; col++)
+            {
+                rowData[col - 1] = worksheet.Cells[row, col].Text;
+            }
+            csvData.Add(rowData);
+        }
 
-		// Add columns using the first row as header
-		foreach (var columnName in csvData[0])
-		{
-			dataTable.Columns.Add(columnName ?? string.Empty);
-		}
+        return csvData;
+    }
 
-		// Add rows (skip header row)
-		for (int i = 1; i < csvData.Count; i++)
-		{
-			dataTable.Rows.Add(csvData[i]);
-		}
+    public DataTable ConvertToDataTable(List<string[]> csvData)
+    {
+        var dataTable = new DataTable();
 
-		return dataTable;
-	}
+        if (csvData == null || csvData.Count == 0)
+            return dataTable;
+
+        // Add columns using the first row as header
+        foreach (var columnName in csvData[0])
+        {
+            dataTable.Columns.Add(columnName ?? string.Empty);
+        }
+
+        // Add rows (skip header row)
+        for (int i = 1; i < csvData.Count; i++)
+        {
+            dataTable.Rows.Add(csvData[i]);
+        }
+
+        return dataTable;
+    }
 }

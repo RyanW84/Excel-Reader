@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Models;
 using ExcelReader.RyanW84.Services;
@@ -16,20 +16,23 @@ public class ExcelBeginnerController(IConfiguration configuration, ExcelReaderDb
     {
         Console.WriteLine("Starting ExcelBeginner import...");
         using var db = dbContext;
+
+        // Get the Excel package and read the data
         var excelPackage = ExcelBeginnerService.ExcelPackage();
         var dataTable = ExcelBeginnerService.ReadFromExcel(excelPackage);
-        Console.WriteLine($"Read {dataTable.Rows.Count} Rows from ExcelBeginner sheet.");
-		Console.WriteLine($"Read {dataTable.Columns.Count} Columns from ExcelBeginner sheet.");
+        Console.WriteLine($"Read {dataTable.Rows.Count} rows from ExcelBeginner sheet.");
 
-		var excelBeginners = ConvertDataTableToExcelBeginners(dataTable);
+        // Convert DataTable to ExcelBeginner entities
+        var excelBeginners = ConvertDataTableToExcelBeginners(dataTable);
+
         db.ExcelBeginner.AddRange(excelBeginners);
-
         db.SaveChanges();
         Console.WriteLine("ExcelBeginner import complete.");
-        excelPackage.Dispose();
-	}
 
-	private List<ExcelBeginner> ConvertDataTableToExcelBeginners(DataTable dataTable)
+        excelPackage.Dispose();
+    }
+
+    private List<ExcelBeginner> ConvertDataTableToExcelBeginners(DataTable dataTable)
     {
         var excelBeginners = new List<ExcelBeginner>();
 

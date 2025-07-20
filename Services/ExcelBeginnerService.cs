@@ -7,41 +7,35 @@ public static class ExcelBeginnerService
 {
     public static ExcelPackage ExcelPackage()
     {
-        
         const string filePath =
             @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelBeginner.xlsx";
         var file = new FileInfo(filePath);
 
-        Console.WriteLine($"Reading from a fixed table");
-        Console.WriteLine($"Reading Excel file: {filePath}");
-
         // Check if the file exists
-        if (!file.Exists) throw new FileNotFoundException($"Excel file not found at path: {filePath}");
+        if (!file.Exists)
+            throw new FileNotFoundException($"Excel file not found at path: {filePath}");
 
         OfficeOpenXml.ExcelPackage.License.SetNonCommercialPersonal("Ryan Weavers");
         var package = new ExcelPackage(file);
         var worksheet = package.Workbook.Worksheets["test"];
 
-        if (worksheet == null) throw new Exception("Worksheet 'test' not found in the Excel file");
-        Console.WriteLine($"Reading worksheet: {worksheet.Name}");
+        if (worksheet == null)
+            throw new Exception("Worksheet 'test' not found in the Excel file");
         return (package);
     }
-    public static DataTable ReadFromExcel(ExcelPackage excelPackage,bool hasHeader = true)
+
+    public static DataTable ReadFromExcel(ExcelPackage excelPackage, bool hasHeader = true)
     {
-        
         var worksheet = excelPackage.Workbook.Worksheets["test"];
         // Get the dimensions of the worksheet
         var rowCount = worksheet.Dimension.End.Row;
         var colCount = worksheet.Dimension.End.Column;
-
-        Console.WriteLine($"Rows: {rowCount}, Columns: {colCount}");
 
         var excelAsTable = new DataTable();
         foreach (var firstRowCell in worksheet.Cells[1, 1, 1, worksheet.Dimension.End.Column])
             //Get column details
             if (!string.IsNullOrEmpty(firstRowCell.Text))
             {
-                Console.WriteLine($"Getting Columns:  {firstRowCell.Text}");
                 var firstColumn = $"Column {firstRowCell.Start.Column}";
                 excelAsTable.Columns.Add(hasHeader ? firstRowCell.Text : firstColumn);
             }
@@ -50,11 +44,10 @@ public static class ExcelBeginnerService
         //Get row details
         for (var rowNum = startRow; rowNum <= worksheet.Dimension.End.Row; rowNum++)
         {
-           
             var wsRow = worksheet.Cells[rowNum, 1, rowNum, excelAsTable.Columns.Count];
             var row = excelAsTable.Rows.Add();
-            Console.WriteLine($"Getting Rows:  {wsRow}");
-            foreach (var cell in wsRow) row[cell.Start.Column -1] = cell.Text;
+            foreach (var cell in wsRow)
+                row[cell.Start.Column - 1] = cell.Text;
         }
 
         return excelAsTable;
