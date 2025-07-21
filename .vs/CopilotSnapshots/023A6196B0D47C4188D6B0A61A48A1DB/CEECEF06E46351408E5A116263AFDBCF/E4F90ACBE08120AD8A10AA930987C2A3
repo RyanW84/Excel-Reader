@@ -36,7 +36,6 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<ReadFromCsv>();
                         services.AddScoped<CreateTableFromCSV>();
                         services.AddScoped<CreateTableFromAnyExcel>();
-                        services.AddScoped<CreateTableFromPdfForm>();
                         services.AddScoped<ReadFromPdf>();
                         services.AddScoped<ReadFromPdfForm>();
                         services.AddScoped<PdfFormController>();
@@ -88,10 +87,8 @@ namespace ExcelReader.RyanW84
 
 			RunInScope(sp =>
 			{
-				var pdfFormController = sp.GetRequiredService<PdfFormController>();
-				// Provide the PDF form file path here
-				var filePath = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
-				pdfFormController.AddDataFromPdfForm(filePath);
+				var PdfFormController = sp.GetRequiredService<PdfFormController>();
+				PdfFormController.
 			});
 		}
     }
