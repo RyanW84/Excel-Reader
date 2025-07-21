@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using iText.Kernel.Pdf;
@@ -53,21 +53,20 @@ public class ReadFromPdf(IConfiguration configuration)
 
         // Assume first row is the title, second row is the column headers
         // Join the header row into a single string, then split by '_'
-        var headerRow = string.Join(",", pdfData[2]);
-        var columnHeaders = headerRow.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-   
+        var headerRow = string.Join(",", pdfData[1]);
+        var columnHeaders = headerRow.Split('_', StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var columnName in columnHeaders)
         {
             dataTable.Columns.Add(columnName.Trim());
         }
 
-       for (int i =3; i<pdfData.Count;i++)
+        // Add rows (skip title and header row)
+        for (int i = 2; i < pdfData.Count; i++)
         {
-            var dataRow = string.Join(",", pdfData[i]);
-            var readRow = dataRow.Split(' ' , StringSplitOptions.RemoveEmptyEntries);
-           dataTable.Rows.Add(readRow);
+            dataTable.Rows.Add(pdfData[i]);
         }
+
         return dataTable;
     }
 }
