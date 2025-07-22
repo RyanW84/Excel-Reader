@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
@@ -49,6 +49,25 @@ public class PdfFormWriteUI
                     );
                     dobValue = newValue;
                 }
+                else if (fieldName.Equals("age", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Always try to calculate age from DOB if available
+                    if (!string.IsNullOrEmpty(dobValue) && DateTime.TryParseExact(dobValue, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dob))
+                    {
+                        var today = DateTime.Today;
+                        var age = today.Year - dob.Year;
+                        if (dob > today.AddYears(-age)) age--;
+                        newValue = age.ToString();
+                        AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {newValue}[/]");
+                    }
+                    else
+                    {
+                        newValue = AnsiConsole.Prompt(
+                            new TextPrompt<string>("Enter age (number):")
+                                .Validate(age => int.TryParse(age, out _) ? ValidationResult.Success() : ValidationResult.Error("Invalid age. Enter a number."))
+                        );
+                    }
+                }
                 else if (fieldName.Equals("sex", StringComparison.OrdinalIgnoreCase))
                 {
                     newValue = AnsiConsole.Prompt(
@@ -73,7 +92,7 @@ public class PdfFormWriteUI
                             .AddChoices("Yes", "No")
                     );
                 }
-                else if (!fieldName.Equals("age", StringComparison.OrdinalIgnoreCase))
+                else
                 {
                     newValue = AnsiConsole.Ask<string>($"Enter new value for [green]{fieldName}[/] (leave blank to keep current):");
                     if (string.IsNullOrWhiteSpace(newValue))
@@ -81,28 +100,6 @@ public class PdfFormWriteUI
                 }
             }
             fieldValues[fieldName] = newValue;
-        }
-
-        // After all fields, recalculate age from DOB if possible
-        if (fields.ContainsKey("age"))
-        {
-            if (!string.IsNullOrEmpty(dobValue) && DateTime.TryParseExact(dobValue, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dob))
-            {
-                var today = DateTime.Today;
-                var age = today.Year - dob.Year;
-                if (dob > today.AddYears(-age)) age--;
-                fieldValues["age"] = age.ToString();
-                AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {age}[/]");
-            }
-            else if (!fieldValues.ContainsKey("age"))
-            {
-                // If age wasn't set in the loop, prompt for it
-                var ageValue = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter age (number):")
-                        .Validate(age => int.TryParse(age, out _) ? ValidationResult.Success() : ValidationResult.Error("Invalid age. Enter a number."))
-                );
-                fieldValues["age"] = ageValue;
-            }
         }
 
         _controller.WriteDataToPdfForm(filePath, fieldValues);
