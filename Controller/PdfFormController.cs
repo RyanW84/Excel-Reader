@@ -16,7 +16,7 @@ public class PdfFormController
 
     public void AddDataFromPdfForm(string filePath)
     {
-        Console.WriteLine($"Reading PDF form fields from: {filePath}");
+        Console.WriteLine($"\nReading PDF form fields from: {filePath}");
         var fields = _readFromPdfForm.ReadFormFields(filePath);
         if (fields.Count == 0)
         {
@@ -24,8 +24,11 @@ public class PdfFormController
             return;
         }
 
+        
+
         // Create DataTable with columns from field labels
         var dataTable = new DataTable("PdfFormImport");
+
         foreach (var key in fields.Keys)
         {
             dataTable.Columns.Add(key);
@@ -39,7 +42,10 @@ public class PdfFormController
         }
         dataTable.Rows.Add(row);
 
-        _createTableFromPdfForm.CreateTableFromPdfFormData(dataTable);
+		Console.WriteLine($"Rows counted: {dataTable.Rows.Count}");
+		Console.WriteLine($"Fields counted: {dataTable.Columns.Count}");
+
+		_createTableFromPdfForm.CreateTableFromPdfFormData(dataTable);
         Console.WriteLine("PDF form data imported to SQL table.");
     }
 }

@@ -100,10 +100,9 @@ namespace ExcelReader.RyanW84
 
             RunInScope(sp =>
             {
+                PdfFormWriteUI.GatherInput();
                 var pdfFormWriteController = sp.GetRequiredService<PdfFormWriteController>();
                 var readFromPdfForm = sp.GetRequiredService<ReadFromPdfForm>();
-                var ui = new PdfFormWriteUI(pdfFormWriteController, readFromPdfForm);
-                ui.GatherInput();
             });
         }
     }

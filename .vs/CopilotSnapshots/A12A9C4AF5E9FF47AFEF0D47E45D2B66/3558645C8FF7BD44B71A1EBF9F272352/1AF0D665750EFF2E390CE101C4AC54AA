@@ -89,22 +89,20 @@ namespace ExcelReader.RyanW84
                 PdfController.AddDataFromPdf();
             });
 
-            RunInScope(sp =>
-            {
-                var pdfFormController = sp.GetRequiredService<PdfFormController>();
-                // Provide the PDF form file path here
-                var filePath =
-                    @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
-                pdfFormController.AddDataFromPdfForm(filePath);
-            });
+			RunInScope(sp =>
+			{
+				var pdfFormController = sp.GetRequiredService<PdfFormController>();
+				// Provide the PDF form file path here
+				var filePath = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
+				pdfFormController.AddDataFromPdfForm(filePath);
+			});
 
-            RunInScope(sp =>
-            {
-                var pdfFormWriteController = sp.GetRequiredService<PdfFormWriteController>();
-                var readFromPdfForm = sp.GetRequiredService<ReadFromPdfForm>();
-                var ui = new PdfFormWriteUI(pdfFormWriteController, readFromPdfForm);
-                ui.GatherInput();
-            });
-        }
+			RunInScope(sp =>
+			{
+				var pdfFormWriteController = sp.GetRequiredService<PdfFormWriteController>();
+				var ui = new PdfFormWriteUI(pdfFormWriteController);
+                ui.Run();
+			});
+		}
     }
 }
