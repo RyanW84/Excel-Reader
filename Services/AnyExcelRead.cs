@@ -29,10 +29,9 @@ public class AnyExcelRead(IConfiguration configuration)
             foreach (var cell in worksheet.Cells[2, columns, worksheet.Dimension.Rows, columns])
                 if (!string.IsNullOrEmpty(cell.Text))
                 {
-                    if (DateTime.TryParse(cell.Text, out _))
+                    if (DateTime.TryParse(cell.Text, out var dateValue))
                     {
-              
-                        readColumn.DataType = typeof(DateTime);
+                        readColumn.DataType = typeof(string); // Store as string in dd-MM-yyyy format
                         typeDetected = true;
                         break;
                     }
@@ -75,10 +74,15 @@ public class AnyExcelRead(IConfiguration configuration)
             for (var col = 1; col <= worksheet.Dimension.Columns; col++)
             {
                 var cellValue = worksheet.Cells[row, col].Text;
-                dataRow[col - 1] = Convert.ChangeType(
-                    cellValue,
-                    dataTable.Columns[col - 1].DataType
-                );
+                var colType = dataTable.Columns[col - 1].DataType;
+                if (colType == typeof(string) && DateTime.TryParse(cellValue, out var dateValue))
+                {
+                    dataRow[col - 1] = dateValue.ToString("dd-MM-yyyy"); // Store as date-only string
+                }
+                else
+                {
+                    dataRow[col - 1] = Convert.ChangeType(cellValue, colType);
+                }
             }
 
             dataTable.Rows.Add(dataRow);

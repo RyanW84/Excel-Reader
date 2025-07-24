@@ -3,18 +3,12 @@ using ExcelReader.RyanW84.Services;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class PdfFormController
+public class PdfFormController(ReadFromPdfForm readFromPdfForm , CreateTableFromPdfForm createTableFromPdfForm)
 {
-    private readonly ReadFromPdfForm _readFromPdfForm;
-    private readonly CreateTableFromPdfForm _createTableFromPdfForm;
+    private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
+    private readonly CreateTableFromPdfForm _createTableFromPdfForm = createTableFromPdfForm;
 
-    public PdfFormController(ReadFromPdfForm readFromPdfForm, CreateTableFromPdfForm createTableFromPdfForm)
-    {
-        _readFromPdfForm = readFromPdfForm;
-        _createTableFromPdfForm = createTableFromPdfForm;
-    }
-
-    public void AddDataFromPdfForm(string filePath)
+	public void AddDataFromPdfForm(string filePath)
     {
         Console.WriteLine($"\nReading PDF form fields from: {filePath}");
         var fields = _readFromPdfForm.ReadFormFields(filePath);

@@ -1,28 +1,20 @@
-using System;
-using System.Collections.Generic;
+using System.Globalization;
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
 using Spectre.Console;
-using System.Globalization;
 
 namespace ExcelReader.RyanW84.UI;
 
-public class PdfFormWriteUI
+public class PdfFormWriteUI(PdfFormWriteController controller , ReadFromPdfForm readFromPdfForm)
 {
-    private readonly PdfFormWriteController _controller;
-    private readonly ReadFromPdfForm _readFromPdfForm;
-
-    public PdfFormWriteUI(PdfFormWriteController controller, ReadFromPdfForm readFromPdfForm)
+	public void PdfGatherInput()
     {
-        _controller = controller;
-        _readFromPdfForm = readFromPdfForm;
-    }
+        var filePath = AnsiConsole.Ask<string>(
+            "\nEnter the path to the PDF form file (or press Enter for default):",
+            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf"
+        );
 
-    public void GatherInput()
-    {
-        var filePath = AnsiConsole.Ask<string>("\nEnter the path to the PDF form file (or press Enter for default):", @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf");
-
-        var fields = _readFromPdfForm.ReadFormFields(filePath);
+        var fields = readFromPdfForm.ReadFormFields(filePath);
         if (fields.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No form fields found or file not found.[/]");
@@ -30,24 +22,61 @@ public class PdfFormWriteUI
         }
 
         var fieldValues = new Dictionary<string, string>();
-        string? dobValue = fields.ContainsKey("DOB") ? fields["DOB"] : null;
+        string? dobValue = fields.TryGetValue("DOB" , out string? value) ? value : null;
+        string? ageFieldName = null;
+
         AnsiConsole.MarkupLine("[yellow]Review and update PDF form fields:[/]");
         foreach (var field in fields)
         {
             var fieldName = field.Key;
             var currentValue = field.Value;
             string newValue = currentValue;
-            bool update = AnsiConsole.Confirm($"Field: [green]{fieldName}[/] | Current Value: [yellow]{currentValue}[/] | Update?");
+            bool update = AnsiConsole.Confirm(
+                $"Field: [green]{fieldName}[/] | Current Value: [yellow]{currentValue}[/] | Update?"
+            );
             if (update)
             {
-                if (fieldName.Equals("DOB", StringComparison.OrdinalIgnoreCase) || fieldName.ToLower().Contains("dob"))
+                if (fieldName.Equals("Name", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Date validation
                     newValue = AnsiConsole.Prompt(
-                        new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):")
-                            .Validate(date => DateTime.TryParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out _) ? ValidationResult.Success() : ValidationResult.Error("Invalid date format. Use dd-MM-yyyy."))
+                        new TextPrompt<string>("Enter the updated Name:")
+                            .DefaultValue(currentValue)
+                            .AllowEmpty()
+                    );
+                }
+                else if (fieldName.Equals("Surname", StringComparison.OrdinalIgnoreCase))
+                {
+                    newValue = AnsiConsole.Prompt(
+                        new TextPrompt<string>("Enter the updated Surname:")
+                            .DefaultValue(currentValue)
+                            .AllowEmpty()
+                    );
+                }
+                else if (
+                    fieldName.Equals("DOB", StringComparison.OrdinalIgnoreCase)
+                    || fieldName.Contains("dob" , StringComparison.CurrentCultureIgnoreCase)
+				)
+                {
+                    newValue = AnsiConsole.Prompt(
+                        new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):").Validate(date =>
+                            DateTime.TryParseExact(
+                                date,
+                                "dd-MM-yyyy",
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out _
+                            )
+                                ? ValidationResult.Success()
+                                : ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
+                        )
                     );
                     dobValue = newValue;
+                }
+                else if (fieldName.Equals("age", StringComparison.OrdinalIgnoreCase))
+                {
+                    AnsiConsole.MarkupLine("Age is autocalculated");
+                    ageFieldName = fieldName;
+                    continue;
                 }
                 else if (fieldName.Equals("sex", StringComparison.OrdinalIgnoreCase))
                 {
@@ -68,43 +97,37 @@ public class PdfFormWriteUI
                 else if (fieldName.Equals("wanted", StringComparison.OrdinalIgnoreCase))
                 {
                     newValue = AnsiConsole.Prompt(
-                        new SelectionPrompt<string>()
-                            .Title("Is wanted?")
-                            .AddChoices("Yes", "No")
+                        new SelectionPrompt<string>().Title("Is wanted?").AddChoices("Yes", "No")
                     );
-                }
-                else if (!fieldName.Equals("age", StringComparison.OrdinalIgnoreCase))
-                {
-                    newValue = AnsiConsole.Ask<string>($"Enter new value for [green]{fieldName}[/] (leave blank to keep current):");
-                    if (string.IsNullOrWhiteSpace(newValue))
-                        newValue = currentValue;
                 }
             }
             fieldValues[fieldName] = newValue;
         }
 
-        // After all fields, recalculate age from DOB if possible
-        if (fields.ContainsKey("age"))
+        // After all fields, recalculate age from DOB if possible, case-insensitive
+        ageFieldName ??= fields.Keys.FirstOrDefault(k => k.Equals("age", StringComparison.OrdinalIgnoreCase));
+        if (ageFieldName != null)
         {
-            if (!string.IsNullOrEmpty(dobValue) && DateTime.TryParseExact(dobValue, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dob))
+            if (
+                !string.IsNullOrEmpty(dobValue)
+                && DateTime.TryParseExact(
+                    dobValue,
+                    "dd-MM-yyyy",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var dob
+                )
+            )
             {
                 var today = DateTime.Today;
                 var age = today.Year - dob.Year;
-                if (dob > today.AddYears(-age)) age--;
-                fieldValues["age"] = age.ToString();
+                if (dob > today.AddYears(-age))
+                    age--;
+                fieldValues[ageFieldName] = age.ToString();
                 AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {age}[/]");
-            }
-            else if (!fieldValues.ContainsKey("age"))
-            {
-                // If age wasn't set in the loop, prompt for it
-                var ageValue = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter age (number):")
-                        .Validate(age => int.TryParse(age, out _) ? ValidationResult.Success() : ValidationResult.Error("Invalid age. Enter a number."))
-                );
-                fieldValues["age"] = ageValue;
             }
         }
 
-        _controller.WriteDataToPdfForm(filePath, fieldValues);
+        controller.WriteDataToPdfForm(filePath, fieldValues);
     }
 }

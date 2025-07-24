@@ -31,6 +31,7 @@ namespace ExcelReader.RyanW84
                         );
                         services.AddScoped<ExcelBeginnerController>();
                         services.AddScoped<AnyExcelReadController>();
+                        services.AddScoped<ExcelWriteController>();
                         services.AddScoped<CsvController>();
                         services.AddScoped<PdfController>();
                         services.AddScoped<PdfFormController>();
@@ -43,6 +44,8 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<PdfFormController>();
                         services.AddScoped<WriteToPdfForm>();
                         services.AddScoped<PdfFormWriteController>();
+                        services.AddScoped<WriteToExcelService>();
+                        services.AddScoped<AnyExcelRead>();
                     }
                 );
 
@@ -103,7 +106,15 @@ namespace ExcelReader.RyanW84
                 var pdfFormWriteController = sp.GetRequiredService<PdfFormWriteController>();
                 var readFromPdfForm = sp.GetRequiredService<ReadFromPdfForm>();
                 var ui = new PdfFormWriteUI(pdfFormWriteController, readFromPdfForm);
-                ui.GatherInput();
+                ui.PdfGatherInput();
+            });
+
+            RunInScope(sp =>
+            {
+                var excelWriteController = sp.GetRequiredService<ExcelWriteController>();
+                var anyExcelRead = sp.GetRequiredService<AnyExcelRead>();
+                var ui = new ExcelUserInputUI(excelWriteController, anyExcelRead);
+                ui.ExcelGatherInput();
             });
         }
     }
