@@ -15,7 +15,10 @@ public class ExcelWriteController(IConfiguration configuration, ExcelReaderDbCon
 	public void WriteDataToExcel(string filePath, Dictionary<string, string> fieldValues)
     {
         _writeToExcelService.WriteFieldsToExcel(filePath, fieldValues);
-        dbContext.SaveChanges();
+        /*removed dbContext.save as this made no difference when running,
+         need to convert the new fields to a DataTable
+         and then run the corresponding method to write to the DB*/
+        
     }
 
     public Dictionary<string, string> GetExistingFieldValues(string filePath)
