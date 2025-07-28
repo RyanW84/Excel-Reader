@@ -10,14 +10,14 @@ public class ExcelUserInputUI(ExcelWriteController controller , AnyExcelRead any
 	public ExcelWriteController Controller { get; } = controller;
 	public AnyExcelRead AnyExcelRead { get; } = anyExcelRead;
 
-	public void ExcelGatherInput()
+	public void ExcelGatherInput(ExistingFields existingFields)
     {
         var filePath = AnsiConsole.Ask<string>(
             "\nEnter the path to the Excel file (or press Enter for default):",
             @"C:\Users\Ryanw\OneDrive\\Documents\GitHub\Excel-Reader\Data\\ExcelDynamic.xlsx"
         );
 
-        var existingFields = Controller.GetExistingFieldValues(filePath);
+        existingFields = Controller.GetExistingFieldValues(filePath);
         if (existingFields.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No fields found or file not found.[/]");
