@@ -28,7 +28,7 @@ public class PdfFormController
     private string GetDefaultPdfFilePath()
     {
         // Example default path
-        return @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\FillablePDF.pdf";
+        return @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
     }
 
     public void AddOrUpdateDataFromPdfForm(string? filePath = null)

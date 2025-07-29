@@ -1,4 +1,4 @@
-// Ignore Spelling: pdf
+﻿// Ignore Spelling: pdf
 
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
@@ -95,10 +95,9 @@ public class MainMenuUI
 						_pdfFormController.AddOrUpdateDataFromPdfForm(pdfFilePath);
 						break;
 					case "PDF: Form Write":
-    pdfFilePath = PromptForFilePath(pdfFilePath, "PDF form file");
-    var pdfFields = _pdfFormWriteController.GetExistingFieldValues(pdfFilePath);
-    _pdfFormWriteController.WriteDataToPdfForm(pdfFilePath, pdfFields);
-    break;
+					_pdfFormWriteController.WriteDataToPdfForm();
+						 );
+						break;
 					case "Exit":
 						exit = true;
 						break;

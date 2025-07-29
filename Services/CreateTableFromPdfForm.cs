@@ -28,6 +28,7 @@ public class CreateTableFromPdfForm
             columnDefs.Add($"[{col.ColumnName}] NVARCHAR(MAX)");
         }
         var createTableSql =
+            $"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='{dataTable.TableName}') " +
             $"CREATE TABLE [{dataTable.TableName}] ({string.Join(", ", columnDefs)})";
 
         using (var command = new SqlCommand(createTableSql, connection))

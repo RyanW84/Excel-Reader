@@ -21,7 +21,7 @@ public class ExcelUserInputUI
 		{
 		var filePath = AnsiConsole.Ask<string>(
 			"\nEnter the path to the Excel file (or press Enter for default):" ,
-			@"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\ExcelDynamic.xlsx"
+			@"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx"
 		);
 
 		var existingFields = Controller.GetExistingFieldValues(filePath);

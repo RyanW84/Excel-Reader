@@ -1,8 +1,8 @@
+using System.Data;
+using System.Data.SqlClient;
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
 using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
-using System.Data;
 
 namespace ExcelReader.RyanW84.Controller;
 
@@ -11,13 +11,15 @@ public class PdfFormWriteController(
     ExcelReaderDbContext dbContext,
     ReadFromPdfForm readFromPdfForm,
     WriteToPdfForm writeToPdfForm,
-    WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService)
+    WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService
+)
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ExcelReaderDbContext _dbContext = dbContext;
     private readonly WriteToPdfForm _writeToPdfForm = writeToPdfForm;
     private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
-    private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
+    private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService =
+        writePdfFormDataToDatabaseService;
 
     public void WriteDataToPdfForm(string filePath, Dictionary<string, string> fieldValues)
     {
@@ -39,5 +41,27 @@ public class PdfFormWriteController(
     public void WriteDataToDatabase(Dictionary<string, string> fieldValues)
     {
         _writePdfFormDataToDatabaseService.Write(fieldValues);
+    }
+
+    public void EnsureTableExists(DataTable dataTable, SqlConnection connection)
+    {
+        var columnDefs = new List<string>();
+        foreach (DataColumn column in dataTable.Columns)
+        {
+            var columnType =
+                column.DataType == typeof(string) ? "NVARCHAR(MAX)"
+                : column.DataType == typeof(int) ? "INT"
+                : column.DataType == typeof(DateTime) ? "DATETIME"
+                : "NVARCHAR(MAX)";
+            columnDefs.Add($"[{column.ColumnName}] {columnType}");
+        }
+
+        var checkTableSql =
+            $"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='{dataTable.TableName}' AND xtype='U') "
+            + $"CREATE TABLE [{dataTable.TableName}] ({string.Join(", ", columnDefs)})";
+        using (var command = new SqlCommand(checkTableSql, connection))
+        {
+            command.ExecuteNonQuery();
+        }
     }
 }
