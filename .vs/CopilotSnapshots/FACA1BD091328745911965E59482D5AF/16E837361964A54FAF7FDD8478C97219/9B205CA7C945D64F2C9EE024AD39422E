@@ -1,4 +1,4 @@
-using Spectre.Console;
+﻿using Spectre.Console;
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UI;
@@ -88,11 +88,10 @@ public class MainMenuUI
                     _pdfFormController.AddOrUpdateDataFromPdfForm(pdfFilePath);
 					break;
                 case "PDF: Form Write":
-                   _pdfFormWriteController.WriteDataToPdfForm(
-                        PromptForFilePath(pdfFilePath, "PDF form file"),
-                        _pdfFormWriteController.GetExistingFieldValues(pdfFilePath)
-                    );
-					break;
+                    pdfFilePath = PromptForFilePath(pdfFilePath, "PDF form file");
+                    var pdfFormUI = new PdfFormWriteUI(_pdfFormWriteController, _readFromPdfForm);
+                    pdfFormUI.PdfGatherInput();
+                    break;
                 case "Exit":
                     exit = true;
                     break;

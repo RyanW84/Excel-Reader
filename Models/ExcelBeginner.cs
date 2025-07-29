@@ -4,8 +4,8 @@ public class ExcelBeginner
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int age { get; set; } = 0;
-    public string sex { get; set; } = string.Empty;
-    public string colour { get; set; } = string.Empty;
-    public string height { get; set; } = string.Empty;
+    public int Age { get; set; } = 0;
+    public string Sex { get; set; } = string.Empty;
+    public string Colour { get; set; } = string.Empty;
+    public string Height { get; set; } = string.Empty;
 }

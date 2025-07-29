@@ -4,23 +4,25 @@ using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class AnyExcelReadController(IConfiguration configuration, ExcelReaderDbContext dbContext)
+public class AnyExcelReadController
 {
-    private readonly IConfiguration _configuration = configuration;
+    private readonly IConfiguration _configuration;
+    private readonly ExcelReaderDbContext _dbContext;
+    private readonly AnyExcelRead _anyExcelRead;
+    private readonly CreateTableFromAnyExcel _createTableFromAnyExcel;
 
-    // Inject both IConfiguration and ExcelReaderDbContext
+    public AnyExcelReadController(IConfiguration configuration, ExcelReaderDbContext dbContext, AnyExcelRead anyExcelRead, CreateTableFromAnyExcel createTableFromAnyExcel)
+    {
+        _configuration = configuration;
+        _dbContext = dbContext;
+        _anyExcelRead = anyExcelRead;
+        _createTableFromAnyExcel = createTableFromAnyExcel;
+    }
 
     public void AddDataFromExcel()
     {
-        Console.WriteLine("\nStarting AnyExcel import...");
-        using var db = dbContext;
-        var anyExcelRead = new AnyExcelRead(_configuration);
-        var dataTable = anyExcelRead.ReadFromExcel();
-        Console.WriteLine($"Read {dataTable.Rows.Count} Rows from dynamic Excel sheet.");
-		Console.WriteLine($"Read {dataTable.Columns.Count} Columns from dynamic Excel sheet.");
-		var createTableFromAnyExcel = new CreateTableFromAnyExcel(_configuration);
-        createTableFromAnyExcel.CreateTableFromExcel(dataTable);
-        db.SaveChanges();
-        Console.WriteLine("AnyExcel import complete.");
+        var dataTable = _anyExcelRead.ReadFromExcel();
+        _createTableFromAnyExcel.CreateTableFromExcel(dataTable);
+        _dbContext.SaveChanges();
     }
 }

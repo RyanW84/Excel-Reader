@@ -1,28 +1,14 @@
 using System.Globalization;
-using ExcelReader.RyanW84.Controller;
-using ExcelReader.RyanW84.Services;
 using Spectre.Console;
 
 namespace ExcelReader.RyanW84.UI;
 
-public class PdfFormWriteUI(PdfFormWriteController controller , ReadFromPdfForm readFromPdfForm)
+public class PdfFormWriteUI
 {
-	public void PdfGatherInput()
+    public Dictionary<string, string> GatherUpdatedFields(Dictionary<string, string> fields)
     {
-        var filePath = AnsiConsole.Ask<string>(
-            "\nEnter the path to the PDF form file (or press Enter for default):",
-            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf"
-        );
-
-        var fields = readFromPdfForm.ReadFormFields(filePath);
-        if (fields.Count == 0)
-        {
-            AnsiConsole.MarkupLine("[red]No form fields found or file not found.[/]");
-            return;
-        }
-
         var fieldValues = new Dictionary<string, string>();
-        string? dobValue = fields.TryGetValue("DOB" , out string? value) ? value : null;
+        string? dobValue = fields.TryGetValue("DOB", out string? value) ? value : null;
         string? ageFieldName = null;
 
         AnsiConsole.MarkupLine("[yellow]Review and update PDF form fields:[/]");
@@ -54,8 +40,8 @@ public class PdfFormWriteUI(PdfFormWriteController controller , ReadFromPdfForm 
                 }
                 else if (
                     fieldName.Equals("DOB", StringComparison.OrdinalIgnoreCase)
-                    || fieldName.Contains("dob" , StringComparison.CurrentCultureIgnoreCase)
-				)
+                    || fieldName.Contains("dob", StringComparison.CurrentCultureIgnoreCase)
+                )
                 {
                     newValue = AnsiConsole.Prompt(
                         new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):").Validate(date =>
@@ -105,7 +91,9 @@ public class PdfFormWriteUI(PdfFormWriteController controller , ReadFromPdfForm 
         }
 
         // After all fields, recalculate age from DOB if possible, case-insensitive
-        ageFieldName ??= fields.Keys.FirstOrDefault(k => k.Equals("age", StringComparison.OrdinalIgnoreCase));
+        ageFieldName ??= fields.Keys.FirstOrDefault(k =>
+            k.Equals("age", StringComparison.OrdinalIgnoreCase)
+        );
         if (ageFieldName != null)
         {
             if (
@@ -127,7 +115,6 @@ public class PdfFormWriteUI(PdfFormWriteController controller , ReadFromPdfForm 
                 AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {age}[/]");
             }
         }
-
-        controller.WriteDataToPdfForm(filePath, fieldValues);
+        return fieldValues;
     }
 }

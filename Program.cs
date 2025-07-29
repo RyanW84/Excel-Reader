@@ -46,6 +46,7 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<PdfFormWriteController>();
                         services.AddScoped<WriteToExcelService>();
                         services.AddScoped<AnyExcelRead>();
+                        services.AddScoped<WritePdfFormDataToDatabaseService>();
                     }
                 );
 
@@ -98,15 +99,18 @@ namespace ExcelReader.RyanW84
                 // Provide the PDF form file path here
                 var filePath =
                     @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
-                pdfFormController.AddDataFromPdfForm(filePath);
+                pdfFormController.AddOrUpdateDataFromPdfForm(filePath);
             });
 
             RunInScope(sp =>
             {
                 var pdfFormWriteController = sp.GetRequiredService<PdfFormWriteController>();
-                var readFromPdfForm = sp.GetRequiredService<ReadFromPdfForm>();
-                var ui = new PdfFormWriteUI(pdfFormWriteController, readFromPdfForm);
-                ui.PdfGatherInput();
+                var ui = new PdfFormWriteUI();
+                var filePath = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\FillablePDF.pdf";
+                var existingFields = pdfFormWriteController.GetExistingFieldValues(filePath);
+                var updatedFields = ui.GatherUpdatedFields(existingFields);
+                pdfFormWriteController.WriteDataToPdfForm(filePath, updatedFields);
+                pdfFormWriteController.WriteDataToDatabase(updatedFields);
             });
 
             RunInScope(sp =>

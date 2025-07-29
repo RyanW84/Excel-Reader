@@ -6,8 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ExcelReader.RyanW84.Data
 {
-    public class ExcelReaderDbContext(DbContextOptions<ExcelReaderDbContext> options) : DbContext(options)
+    public class ExcelReaderDbContext : DbContext
     {
+        public ExcelReaderDbContext(DbContextOptions<ExcelReaderDbContext> options) : base(options) { }
+
         public DbSet<ExcelBeginner> ExcelBeginner { get; set; }
 
         public static ILoggerFactory GetLoggerFactory()
@@ -30,9 +32,9 @@ namespace ExcelReader.RyanW84.Data
                 .HasData(
                     new List<ExcelBeginner>
                     {
-                        new() { Id = 1, Name = "Name", age = 1, sex = "NA", colour = "NA", height = "F000" },
-                        new() { Id = 2, Name = "Name2", age = 2, sex = "NA", colour = "NA", height = "F200" },
-                        new() { Id = 3, Name = "Name3", age = 3, sex = "NA", colour = "NA", height = "F300" }
+                        new() { Id = 1, Name = "Name", Age = 1, Sex = "NA", Colour = "NA", Height = "F000" },
+                        new() { Id = 2, Name = "Name2", Age = 2, Sex = "NA", Colour = "NA", Height = "F200" },
+                        new() { Id = 3, Name = "Name3", Age = 3, Sex = "NA", Colour = "NA", Height = "F300" }
                     }
                 );
         }
@@ -52,14 +54,13 @@ namespace ExcelReader.RyanW84.Data
         }
     }
 
-    // Extension method for adding DbContext to the service collection
-    public class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
-        public  IServiceCollection AddExcelReaderDbContext(IServiceCollection services, string connectionString)
+        public static IServiceCollection AddExcelReaderDbContext(this IServiceCollection services, string connectionString)
         {
-            services.AddDbContext<ExcelReaderDbContext>(optionsAction: options =>
-                options.UseSqlServer(@"Server=(localdb)\\MSSQLlocaldb; Database=ExcelReader; Integrated Security=True; MultipleActiveResultSets=True;")
-                       .UseLoggerFactory(loggerFactory: ExcelReaderDbContext.GetLoggerFactory())
+            services.AddDbContext<ExcelReaderDbContext>(options =>
+                options.UseSqlServer(connectionString)
+                       .UseLoggerFactory(ExcelReaderDbContext.GetLoggerFactory())
                        .EnableSensitiveDataLogging());
 
             return services;

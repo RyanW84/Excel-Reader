@@ -9,22 +9,20 @@ namespace ExcelReader.RyanW84.Controller;
 public class ExcelBeginnerController(IConfiguration configuration, ExcelReaderDbContext dbContext)
 {
     private readonly IConfiguration _configuration = configuration;
-
-    // Inject both IConfiguration and ExcelReaderDbContext
+    private readonly ExcelReaderDbContext _dbContext = dbContext;
 
     public void AddDataFromExcel()
     {
         Console.WriteLine("Starting ExcelBeginner import...");
-        using var db = dbContext;
         var excelPackage = ExcelBeginnerService.ExcelPackage();
         var dataTable = ExcelBeginnerService.ReadFromExcel(excelPackage);
         Console.WriteLine($"Read {dataTable.Rows.Count} Rows from ExcelBeginner sheet.");
 		Console.WriteLine($"Read {dataTable.Columns.Count} Columns from ExcelBeginner sheet.");
 
 		var excelBeginners = ConvertDataTableToExcelBeginners(dataTable);
-        db.ExcelBeginner.AddRange(excelBeginners);
+        _dbContext.ExcelBeginner.AddRange(excelBeginners);
 
-        db.SaveChanges();
+        _dbContext.SaveChanges();
         Console.WriteLine("ExcelBeginner import complete.");
         excelPackage.Dispose();
 	}
@@ -38,10 +36,10 @@ public class ExcelBeginnerController(IConfiguration configuration, ExcelReaderDb
             var excelBeginner = new ExcelBeginner
             {
                 Name = row["Name"].ToString() ?? string.Empty,
-                age = int.TryParse(row["age"].ToString(), out var age) ? age : 0,
-                sex = row["sex"].ToString() ?? string.Empty,
-                colour = row["colour"].ToString() ?? string.Empty,
-                height = row["height"].ToString() ?? string.Empty
+                Age = int.TryParse(row["age"].ToString(), out var age) ? age : 0,
+                Sex = row["sex"].ToString() ?? string.Empty,
+                Colour = row["colour"].ToString() ?? string.Empty,
+                Height = row["height"].ToString() ?? string.Empty
             };
 
             excelBeginners.Add(excelBeginner);
