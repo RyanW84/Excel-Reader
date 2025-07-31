@@ -1,4 +1,6 @@
 using System.Data;
+
+using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UI;
 using Spectre.Console;
@@ -11,55 +13,47 @@ public class PdfFormController
     private readonly WriteToPdfForm _writeToPdfForm;
     private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService;
     private readonly PdfFormWriteUI _pdfFormWriteUI;
+    private readonly PdfFilePathSelector _pdfFilePathSelector;
+    private readonly UserNotifier _userNotifier;
 
     public PdfFormController(
         ReadFromPdfForm readFromPdfForm,
         WriteToPdfForm writeToPdfForm,
         WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
-        PdfFormWriteUI pdfFormWriteUI)
+        PdfFormWriteUI pdfFormWriteUI,
+        PdfFilePathSelector pdfFilePathSelector,
+        UserNotifier userNotifier)
     {
         _readFromPdfForm = readFromPdfForm;
         _writeToPdfForm = writeToPdfForm;
         _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
         _pdfFormWriteUI = pdfFormWriteUI;
-    }
-
-    // You can replace this with a service or configuration lookup as needed
-    private string GetDefaultPdfFilePath()
-    {
-        // Example default path
-        return @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
+        _pdfFilePathSelector = pdfFilePathSelector;
+        _userNotifier = userNotifier;
     }
 
     public void AddOrUpdateDataFromPdfForm(string? filePath = null)
     {
-        // 1. Get the existing or default file path
-        var defaultPath = filePath ?? GetDefaultPdfFilePath();
+        // 1. Get the file path using the selector
+        var selectedPath = _pdfFilePathSelector.GetPdfFilePath(filePath);
 
-        // 2. Ask the user if they want to use the existing path or input a new one
-        var useExisting = AnsiConsole.Confirm($"Use existing PDF form file path? [green]{defaultPath}[/]");
-        if (!useExisting)
-        {
-            defaultPath = AnsiConsole.Ask<string>("Enter the path to the PDF form file:", defaultPath);
-        }
-
-        // 3. Read existing fields from PDF
-        var fields = _readFromPdfForm.ReadFormFields(defaultPath);
+        // 2. Read existing fields from PDF
+        var fields = _readFromPdfForm.ReadFormFields(selectedPath);
         if (fields.Count == 0)
         {
-            Console.WriteLine("No form fields found or file not found.");
+            _userNotifier.ShowError("No form fields found or file not found.");
             return;
         }
 
-        // 4. Pass fields to UI for user to update
+        // 3. Pass fields to UI for user to update
         var updatedFields = _pdfFormWriteUI.GatherUpdatedFields(fields);
 
-        // 5. Write updated fields back to PDF form
-        _writeToPdfForm.WriteFormFields(defaultPath, updatedFields);
+        // 4. Write updated fields back to PDF form
+        _writeToPdfForm.WriteFormFields(selectedPath, updatedFields);
 
-        // 6. Add updated data to the database
+        // 5. Add updated data to the database
         _writePdfFormDataToDatabaseService.Write(updatedFields);
 
-        Console.WriteLine("PDF form updated and data imported to SQL table.");
+        _userNotifier.ShowSuccess("PDF form updated and data imported to SQL table.");
     }
 }

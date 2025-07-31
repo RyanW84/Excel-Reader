@@ -19,11 +19,14 @@ public class DictionaryToDataTableConverter
         {
             dataTable.Columns.Add(key);
         }
+
         var row = dataTable.NewRow();
+
         foreach (var kvp in dictionary)
         {
-            row[kvp.Key] = kvp.Value ?? DBNull.Value;
+            row[kvp.Key] = kvp.Value != null ? kvp.Value : DBNull.Value;
         }
+
         dataTable.Rows.Add(row);
         return dataTable;
     }

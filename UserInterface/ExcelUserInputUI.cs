@@ -1,138 +1,117 @@
-using System.Data;
-using System.Globalization;
-using ExcelReader.RyanW84.Controller;
-using ExcelReader.RyanW84.Services;
+using ExcelReader.RyanW84.Helpers;
+
 using Spectre.Console;
 
-namespace ExcelReader.RyanW84.UI;
+namespace ExcelReader.RyanW84.UserInterface;
 
-public class ExcelUserInputUI
+public class ExcelUserInputUi
 	{
-	public ExcelWriteController Controller { get; }
-	public AnyExcelRead AnyExcelRead { get; }
-
-	public ExcelUserInputUI(ExcelWriteController controller , AnyExcelRead anyExcelRead)
+	public string GetFilePath(string defaultPath)
 		{
-		Controller = controller;
-		AnyExcelRead = anyExcelRead;
+		return AnsiConsole.Ask<string>(
+			"\nEnter the path to the Excel file (or press Enter for default):" ,
+			defaultPath
+		);
 		}
 
-	public void ExcelGatherInput()
+	public Dictionary<string , string> UpdateFieldValues(Dictionary<string , string> existingFields)
 		{
-		var filePath = AnsiConsole.Ask<string>(
-			"\nEnter the path to the Excel file (or press Enter for default):" ,
-			@"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx"
-		);
-
-		var existingFields = Controller.GetExistingFieldValues(filePath);
-		if (existingFields == null || existingFields.Count == 0)
-			{
-			DisplayErrorMessage();
-			return;
-			}
-
 		var fieldValues = new Dictionary<string , string>();
 		string? dobValue = existingFields.TryGetValue("DOB" , out string? value) ? value : null;
 		string? ageFieldName = null;
 
 		AnsiConsole.MarkupLine("[yellow]Review and update Excel fields:[/]");
-		foreach(var field in existingFields)
+		foreach (var (fieldName , currentValue) in existingFields)
 			{
-			var fieldName = field.Key;
-			var currentValue = field.Value;
 			string newValue = currentValue;
-			bool update = AnsiConsole.Confirm(
-				$"Field: [green]{fieldName}[/] | Current Value: [yellow]{currentValue}[/] | Update?"
-			);
-			if(update)
+			if(!AnsiConsole.Confirm(
+				$"Field: [green]{fieldName}[/] | Current Value: [yellow]{currentValue}[/] | Update?" ))
 				{
-				if(fieldName.Equals("Name" , StringComparison.OrdinalIgnoreCase))
-					{
-					newValue = AnsiConsole.Prompt(
-						new TextPrompt<string>("Enter the updated Name:")
-							.DefaultValue(currentValue)
-							.AllowEmpty()
-					);
-					}
-				else if(fieldName.Equals("Surname" , StringComparison.OrdinalIgnoreCase))
-					{
-					newValue = AnsiConsole.Prompt(
-						new TextPrompt<string>("Enter the updated Surname:")
-							.DefaultValue(currentValue)
-							.AllowEmpty()
-					);
-					}
-				else if(
-					fieldName.Contains("dob" , StringComparison.CurrentCultureIgnoreCase)
-				)
-					{
-					newValue = AnsiConsole.Prompt(
-						new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):").Validate(date =>
-							DateTime.TryParseExact(
-								date ,
-								"dd-MM-yyyy" ,
-								CultureInfo.InvariantCulture ,
-								DateTimeStyles.None ,
-								out _
-							)
-								? ValidationResult.Success()
-								: ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
-						)
-					);
-					dobValue = newValue;
-					}
-				else if(fieldName.Equals("age" , StringComparison.OrdinalIgnoreCase))
-					{
-					AnsiConsole.MarkupLine("Age is autocalculated");
-					ageFieldName = fieldName;
-					continue;
-					}
-				else if(fieldName.Equals("sex" , StringComparison.OrdinalIgnoreCase))
-					{
-					newValue = AnsiConsole.Prompt(
-						new SelectionPrompt<string>()
-							.Title("Select sex:")
-							.AddChoices("Male" , "Female" , "Other")
-					);
-					}
-				else if(fieldName.Equals("colour" , StringComparison.OrdinalIgnoreCase))
-					{
-					newValue = AnsiConsole.Prompt(
-						new SelectionPrompt<string>()
-							.Title("Select colour:")
-							.AddChoices("White" , "Black" , "Asian" , "African" , "Other")
-					);
-					}
+				fieldValues[fieldName] = newValue;
+				continue;
 				}
-			fieldValues[fieldName] = newValue;
+
+			newValue = fieldName.ToLowerInvariant() switch
+				{
+				"name" => PromptForName(currentValue) ,
+				"surname" => PromptForSurname(currentValue) ,
+				"age" => HandleAgeField(ref ageFieldName , fieldName , newValue) ,
+				"sex" => PromptForSex( ) ,
+				"colour" => PromptForColour( ) ,
+				_ when fieldName.Contains("dob" , StringComparison.OrdinalIgnoreCase) =>
+					dobValue = PromptForDob(currentValue) ,
+				_ => PromptForGeneric(currentValue , fieldName)
+				};
+
+			fieldValues[fieldName] = newValue ?? string.Empty;
 			}
 
 		// After all fields, recalculate age from DOB if possible, case-insensitive
-		ageFieldName ??= existingFields.Keys.FirstOrDefault(k => k.Equals("age" , StringComparison.OrdinalIgnoreCase));
+		ageFieldName ??= existingFields.Keys.FirstOrDefault(k =>
+			k.Equals("age" , StringComparison.OrdinalIgnoreCase)
+		);
 		if(ageFieldName != null)
 			{
-			if(
-				!string.IsNullOrEmpty(dobValue)
-				&& DateTime.TryParseExact(
-					dobValue ,
-					"dd-MM-yyyy" ,
-					CultureInfo.InvariantCulture ,
-					DateTimeStyles.None ,
-					out var dob
-				)
-			)
+			var age = ExcelFieldValidator.CalculateAge(dobValue);
+			if(age != null)
 				{
-				var today = DateTime.Today;
-				var age = today.Year - dob.Year;
-				if(dob > today.AddYears(-age))
-					age--;
 				fieldValues[ageFieldName] = age.ToString();
 				AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {age}[/]");
 				}
 			}
-
-		Controller.WriteDataToExcel(filePath , fieldValues);
+		return fieldValues;
 		}
+
+	private string PromptForName(string currentValue) =>
+		AnsiConsole.Prompt(
+			new TextPrompt<string>("Enter the updated Name:")
+				.DefaultValue(currentValue)
+				.AllowEmpty()
+		);
+
+	private string PromptForSurname(string currentValue) =>
+		AnsiConsole.Prompt(
+			new TextPrompt<string>("Enter the updated Surname:")
+				.DefaultValue(currentValue)
+				.AllowEmpty()
+		);
+
+	private string PromptForDob(string currentValue) =>
+		AnsiConsole.Prompt(
+			new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):").Validate(date =>
+				ExcelFieldValidator.IsValidDate(date)
+					? ValidationResult.Success()
+					: ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
+			)
+		);
+
+	private string PromptForSex() =>
+		AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("Select sex:")
+				.AddChoices("Male" , "Female" , "Other")
+		);
+
+	private string PromptForColour() =>
+		AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("Select colour:")
+				.AddChoices("White" , "Black" , "Asian" , "African" , "Other")
+		);
+
+	private string HandleAgeField(ref string? ageFieldName , string fieldName , string currentValue)
+		{
+		AnsiConsole.MarkupLine("Age is autocalculated");
+		ageFieldName = fieldName;
+		return currentValue;
+		}
+
+	private string PromptForGeneric(string currentValue , string fieldName) =>
+		AnsiConsole.Prompt(
+			new TextPrompt<string>($"Enter the updated value for {fieldName}:")
+				.DefaultValue(currentValue)
+				.AllowEmpty()
+		);
 
 	public void DisplayMessage(string message)
 		{
@@ -143,17 +122,20 @@ public class ExcelUserInputUI
 		{
 		AnsiConsole.MarkupLine($"[red]{message}[/]");
 		}
+
 	public void DisplaySuccess(string message)
 		{
 		AnsiConsole.MarkupLine($"[green]{message}[/]");
 		}
+
 	public void DisplayWarning(string message)
 		{
 		AnsiConsole.MarkupLine($"[yellow]{message}[/]");
 		}
+
 	public void DisplayErrorMessage( )
 		{
 		AnsiConsole.MarkupLine("[red]An error occurred while processing the Excel file.[/]");
 		}
-
 	}
+// This class provides a user interface for interacting with Excel files, allowing users to input file paths and update field values interactively.

@@ -1,4 +1,7 @@
 using System.Globalization;
+
+using ExcelReader.RyanW84.Helpers;
+
 using Spectre.Console;
 
 namespace ExcelReader.RyanW84.UI;
@@ -24,38 +27,18 @@ public class PdfFormWriteUI
             {
                 if (fieldName.Equals("Name", StringComparison.OrdinalIgnoreCase))
                 {
-                    newValue = AnsiConsole.Prompt(
-                        new TextPrompt<string>("Enter the updated Name:")
-                            .DefaultValue(currentValue)
-                            .AllowEmpty()
-                    );
+                    newValue = PromptForName(currentValue);
                 }
                 else if (fieldName.Equals("Surname", StringComparison.OrdinalIgnoreCase))
                 {
-                    newValue = AnsiConsole.Prompt(
-                        new TextPrompt<string>("Enter the updated Surname:")
-                            .DefaultValue(currentValue)
-                            .AllowEmpty()
-                    );
+                    newValue = PromptForSurname(currentValue);
                 }
                 else if (
                     fieldName.Equals("DOB", StringComparison.OrdinalIgnoreCase)
                     || fieldName.Contains("dob", StringComparison.CurrentCultureIgnoreCase)
                 )
                 {
-                    newValue = AnsiConsole.Prompt(
-                        new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):").Validate(date =>
-                            DateTime.TryParseExact(
-                                date,
-                                "dd-MM-yyyy",
-                                CultureInfo.InvariantCulture,
-                                DateTimeStyles.None,
-                                out _
-                            )
-                                ? ValidationResult.Success()
-                                : ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
-                        )
-                    );
+                    newValue = PromptForDob(currentValue);
                     dobValue = newValue;
                 }
                 else if (fieldName.Equals("age", StringComparison.OrdinalIgnoreCase))
@@ -66,25 +49,15 @@ public class PdfFormWriteUI
                 }
                 else if (fieldName.Equals("sex", StringComparison.OrdinalIgnoreCase))
                 {
-                    newValue = AnsiConsole.Prompt(
-                        new SelectionPrompt<string>()
-                            .Title("Select sex:")
-                            .AddChoices("Male", "Female", "Other")
-                    );
+                    newValue = PromptForSex();
                 }
                 else if (fieldName.Equals("colour", StringComparison.OrdinalIgnoreCase))
                 {
-                    newValue = AnsiConsole.Prompt(
-                        new SelectionPrompt<string>()
-                            .Title("Select colour:")
-                            .AddChoices("White", "Black", "Asian", "African", "Other")
-                    );
+                    newValue = PromptForColour();
                 }
                 else if (fieldName.Equals("wanted", StringComparison.OrdinalIgnoreCase))
                 {
-                    newValue = AnsiConsole.Prompt(
-                        new SelectionPrompt<string>().Title("Is wanted?").AddChoices("Yes", "No")
-                    );
+                    newValue = PromptForWanted();
                 }
             }
             fieldValues[fieldName] = newValue;
@@ -96,25 +69,57 @@ public class PdfFormWriteUI
         );
         if (ageFieldName != null)
         {
-            if (
-                !string.IsNullOrEmpty(dobValue)
-                && DateTime.TryParseExact(
-                    dobValue,
-                    "dd-MM-yyyy",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out var dob
-                )
-            )
+            var age = PdfFieldValidator.CalculateAge(dobValue);
+            if (age != null)
             {
-                var today = DateTime.Today;
-                var age = today.Year - dob.Year;
-                if (dob > today.AddYears(-age))
-                    age--;
                 fieldValues[ageFieldName] = age.ToString();
                 AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {age}[/]");
             }
         }
         return fieldValues;
     }
+
+    private string PromptForName(string currentValue) =>
+        AnsiConsole.Prompt(
+            new TextPrompt<string>("Enter the updated Name:")
+                .DefaultValue(currentValue)
+                .AllowEmpty()
+        );
+
+    private string PromptForSurname(string currentValue) =>
+        AnsiConsole.Prompt(
+            new TextPrompt<string>("Enter the updated Surname:")
+                .DefaultValue(currentValue)
+                .AllowEmpty()
+        );
+
+    private string PromptForDob(string currentValue) =>
+        AnsiConsole.Prompt(
+            new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):").Validate(date =>
+                PdfFieldValidator.IsValidDate(date)
+                    ? ValidationResult.Success()
+                    : ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
+            )
+        );
+
+    private string PromptForSex() =>
+        AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Select sex:")
+                .AddChoices("Male", "Female", "Other")
+        );
+
+    private string PromptForColour() =>
+        AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Select colour:")
+                .AddChoices("White", "Black", "Asian", "African", "Other")
+        );
+
+    private string PromptForWanted() =>
+        AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("Is wanted?")
+                .AddChoices("Yes", "No")
+        );
 }
