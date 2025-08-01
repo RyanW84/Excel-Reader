@@ -1,10 +1,10 @@
-// Ignore Spelling: pdf
+﻿// Ignore Spelling: pdf
 
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
 using Spectre.Console;
 
-namespace ExcelReader.RyanW84.UserInterface;
+namespace ExcelReader.RyanW84.UI;
 
 public class MainMenuUI
 {

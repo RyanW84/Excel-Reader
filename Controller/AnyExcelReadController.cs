@@ -19,7 +19,7 @@ public class AnyExcelReadController
         _createTableFromAnyExcel = createTableFromAnyExcel;
     }
 
-    public void AddDataFromExcel()
+    public void AddDynamicDataFromExcel()
     {
         var dataTable = _anyExcelRead.ReadFromExcel();
         _createTableFromAnyExcel.CreateTableFromExcel(dataTable);
