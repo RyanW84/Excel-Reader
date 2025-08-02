@@ -55,8 +55,7 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-28T12:14:57.996Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -104,21 +103,19 @@
               "RelativeToolTip": "Services\\WriteToPdfForm.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:35:49.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-28T12:35:49.791Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "ExcelUserInputUI.cs",
-              "DocumentMoniker": "C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\UserInterface\\ExcelUserInputUI.cs",
-              "RelativeDocumentMoniker": "UserInterface\\ExcelUserInputUI.cs",
-              "ToolTip": "C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\UserInterface\\ExcelUserInputUI.cs",
-              "RelativeToolTip": "UserInterface\\ExcelUserInputUI.cs",
+              "DocumentMoniker": "C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\UserInterface\\ExcelUserInputUi.cs",
+              "RelativeDocumentMoniker": "UserInterface\\ExcelUserInputUi.cs",
+              "ToolTip": "C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\UserInterface\\ExcelUserInputUi.cs",
+              "RelativeToolTip": "UserInterface\\ExcelUserInputUi.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:27:29.924Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-28T12:27:29.924Z"
             },
             {
               "$type": "Document",
@@ -130,8 +127,7 @@
               "RelativeToolTip": "Controller\\PdfFormWriteController.cs",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAACYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:17:02.376Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-28T12:17:02.376Z"
             },
             {
               "$type": "Document",
@@ -141,7 +137,7 @@
               "RelativeDocumentMoniker": "Controller\\ExcelWriteController.cs",
               "ToolTip": "C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Controller\\ExcelWriteController.cs",
               "RelativeToolTip": "Controller\\ExcelWriteController.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAAAcwFYAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAACgAAAAAAAAAAAAQwEkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-28T12:16:15.621Z",
               "EditorCaption": ""
@@ -156,8 +152,7 @@
               "RelativeToolTip": "Services\\ExcelBeginnerService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:13:12.361Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-28T12:13:12.361Z"
             },
             {
               "$type": "Document",
@@ -169,8 +164,7 @@
               "RelativeToolTip": "Data\\ExcelReaderDbContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-14T19:27:15.569Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-14T19:27:15.569Z"
             },
             {
               "$type": "Document",
@@ -182,8 +176,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAADAAAAAAAAAAAAAxwAoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-14T19:27:06.892Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-14T19:27:06.892Z"
             }
           ]
         },
