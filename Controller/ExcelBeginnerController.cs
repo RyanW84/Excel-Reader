@@ -1,33 +1,49 @@
 using System.Data;
 using ExcelReader.RyanW84.Data;
+using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Models;
 using ExcelReader.RyanW84.Services;
 using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class ExcelBeginnerController(IConfiguration configuration, ExcelReaderDbContext dbContext)
+public class ExcelBeginnerController(
+    ExcelBeginnerService excelBeginnerService,
+    ExcelReaderDbContext dbContext,
+    UserNotifier userNotifier
+)
 {
-    private readonly IConfiguration _configuration = configuration;
+    private readonly ExcelBeginnerService _excelBeginnerService = excelBeginnerService;
     private readonly ExcelReaderDbContext _dbContext = dbContext;
+    private readonly UserNotifier _userNotifier = userNotifier;
 
-    public void AddDataFromExcel()
+    // Orchestrator method for all steps
+    public async Task AddDataFromExcel()
     {
-        Console.WriteLine("Starting ExcelBeginner import...");
-        var excelPackage = ExcelBeginnerService.ExcelPackage();
-        var dataTable = ExcelBeginnerService.ReadFromExcel(excelPackage);
-        Console.WriteLine($"Read {dataTable.Rows.Count} Rows from ExcelBeginner sheet.");
-		Console.WriteLine($"Read {dataTable.Columns.Count} Columns from ExcelBeginner sheet.");
+        // 1. Read data from Excel file
+        var dataTable = _excelBeginnerService.ReadFromExcel();
+        if (dataTable == null || dataTable.Rows.Count == 0)
+        {
+            _userNotifier.ShowError("No data found in the Excel file.");
+            return;
+        }
 
-		var excelBeginners = ConvertDataTableToExcelBeginners(dataTable);
+        // 2. Convert DataTable to domain models
+        var excelBeginners = ConvertDataTableToModels(dataTable);
+        if (excelBeginners.Count == 0)
+        {
+            _userNotifier.ShowError("No valid data rows found to import.");
+            return;
+        }
+
+        // 3. Save to database
         _dbContext.ExcelBeginner.AddRange(excelBeginners);
+        await _dbContext.SaveChangesAsync();
 
-        _dbContext.SaveChanges();
-        Console.WriteLine("ExcelBeginner import complete.");
-        excelPackage.Dispose();
-	}
+        _userNotifier.ShowSuccess($"ExcelBeginner import complete. Imported {excelBeginners.Count} records.");
+    }
 
-	private List<ExcelBeginner> ConvertDataTableToExcelBeginners(DataTable dataTable)
+    private List<ExcelBeginner> ConvertDataTableToModels(DataTable dataTable)
     {
         var excelBeginners = new List<ExcelBeginner>();
 
@@ -35,16 +51,31 @@ public class ExcelBeginnerController(IConfiguration configuration, ExcelReaderDb
         {
             var excelBeginner = new ExcelBeginner
             {
-                Name = row["Name"].ToString() ?? string.Empty,
-                Age = int.TryParse(row["age"].ToString(), out var age) ? age : 0,
-                Sex = row["sex"].ToString() ?? string.Empty,
-                Colour = row["colour"].ToString() ?? string.Empty,
-                Height = row["height"].ToString() ?? string.Empty
+                Name = GetStringValue(row, "Name"),
+                Age = GetIntValue(row, "age"),
+                Sex = GetStringValue(row, "sex"),
+                Colour = GetStringValue(row, "colour"),
+                Height = GetStringValue(row, "height")
             };
+
+            // Skip rows with empty required fields
+            if (string.IsNullOrWhiteSpace(excelBeginner.Name))
+                continue;
 
             excelBeginners.Add(excelBeginner);
         }
 
         return excelBeginners;
+    }
+
+    private static string GetStringValue(DataRow row, string columnName)
+    {
+        return row[columnName]?.ToString()?.Trim() ?? string.Empty;
+    }
+
+    private static int GetIntValue(DataRow row, string columnName)
+    {
+        var value = row[columnName]?.ToString()?.Trim();
+        return int.TryParse(value, out var result) ? result : 0;
     }
 }

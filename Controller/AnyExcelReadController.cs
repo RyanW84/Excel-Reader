@@ -19,10 +19,10 @@ public class AnyExcelReadController
         _createTableFromAnyExcel = createTableFromAnyExcel;
     }
 
-    public void AddDynamicDataFromExcel()
+    public async Task AddDynamicDataFromExcel()
     {
-        var dataTable = _anyExcelRead.ReadFromExcel();
+        var dataTable = await _anyExcelRead.ReadFromExcelAsync();
         _createTableFromAnyExcel.CreateTableFromExcel(dataTable);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
 }

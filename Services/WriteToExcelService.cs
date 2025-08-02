@@ -1,6 +1,4 @@
 using OfficeOpenXml;
-using System.Data;
-using System.Globalization;
 
 namespace ExcelReader.RyanW84.Services;
 
@@ -8,35 +6,25 @@ public class WriteToExcelService
 {
     public void WriteFieldsToExcel(string filePath, Dictionary<string, string> fieldValues)
     {
+        // Set the license using the new EPPlus 8+ API
         ExcelPackage.License.SetNonCommercialPersonal("Ryan Weavers");
-        using var package = new ExcelPackage(new FileInfo(filePath));
-        var worksheet = package.Workbook.Worksheets[0];
 
-        // Assume first row is header
-        var headers = new Dictionary<string, int>();
-        for (int col = 1; col <= worksheet.Dimension.Columns; col++)
+        using (var package = new ExcelPackage(new FileInfo(filePath)))
         {
-            var header = worksheet.Cells[1, col].Text;
-            if (!string.IsNullOrWhiteSpace(header))
-                headers[header] = col;
-        }
+            ExcelWorksheet worksheet;
+            if (package.Workbook.Worksheets.Count == 0)
+                worksheet = package.Workbook.Worksheets.Add("Sheet1");
+            else
+                worksheet = package.Workbook.Worksheets[0];
 
-        // Update first data row (row 2)
-        foreach (var kvp in fieldValues)
-        {
-            if (headers.TryGetValue(kvp.Key, out int col))
+            int col = 1;
+            foreach (var kvp in fieldValues)
             {
-                // If the value is a date in dd-MM-yyyy format, write as date-only
-                if (DateTime.TryParseExact(kvp.Value, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateValue))
-                {
-                    worksheet.Cells[2, col].Value = dateValue.ToString("dd-MM-yyyy");
-                }
-                else
-                {
-                    worksheet.Cells[2, col].Value = kvp.Value;
-                }
+                worksheet.Cells[1, col].Value = kvp.Key;
+                worksheet.Cells[2, col].Value = kvp.Value;
+                col++;
             }
+            package.Save();
         }
-        package.Save();
     }
 }

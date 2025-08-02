@@ -6,23 +6,16 @@ using ExcelReader.RyanW84.Data;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class WriteUpdatedExcelDataToDatabase
-	{
-	private readonly DictionaryToDataTableConverter _dictToTableConverter;
-	private readonly CreateTableFromAnyExcel _createTableFromAnyExcel;
-	private readonly ExcelReaderDbContext _dbContext;
+public class WriteUpdatedExcelDataToDatabase(
+	DictionaryToDataTableConverter dictToTableConverter ,
+	CreateTableFromAnyExcel createTableFromAnyExcel ,
+	ExcelReaderDbContext dbContext)
+{
+	private readonly DictionaryToDataTableConverter _dictToTableConverter = dictToTableConverter;
+	private readonly CreateTableFromAnyExcel _createTableFromAnyExcel = createTableFromAnyExcel;
+	private readonly ExcelReaderDbContext _dbContext = dbContext;
 
-	public WriteUpdatedExcelDataToDatabase(
-		DictionaryToDataTableConverter dictToTableConverter ,
-		CreateTableFromAnyExcel createTableFromAnyExcel ,
-		ExcelReaderDbContext dbContext)
-		{
-		_dictToTableConverter = dictToTableConverter;
-		_createTableFromAnyExcel = createTableFromAnyExcel;
-		_dbContext = dbContext;
-		}
-
-	public void Write(Dictionary<string , string> fieldValues)
+	public async Task WriteAsync(Dictionary<string , string> fieldValues)
 		{
 		// Convert string dictionary to object dictionary for the converter
 		var objDict = new Dictionary<string , object>(fieldValues.Count);
@@ -37,6 +30,12 @@ public class WriteUpdatedExcelDataToDatabase
 
 		// Use the existing service to create and populate the table
 		_createTableFromAnyExcel.CreateTableFromExcel(dataTable);
-		_dbContext.SaveChanges();
+		await _dbContext.SaveChangesAsync();
+		}
+
+	// Keep synchronous version for backward compatibility during transition
+	public void Write(Dictionary<string , string> fieldValues)
+		{
+		WriteAsync(fieldValues).GetAwaiter().GetResult();
 		}
 	}
