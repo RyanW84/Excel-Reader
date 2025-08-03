@@ -72,10 +72,10 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<IExcelWriteService, WriteToExcelService>();
                         
                         // File Reading Services with interfaces
-                        services.AddScoped<ReadFromCsv>(); // TODO: ICsvFileReader
-                        services.AddScoped<IAnyExcelReader, AnyExcelRead>(); // Implemented
-                        services.AddScoped<ReadFromPdf>(); // TODO: IPdfTableReader  
-                        services.AddScoped<IPdfFormReader, ReadFromPdfForm>(); // Implemented
+                        services.AddScoped<ICsvFileReader, ReadFromCsv>(); // Implemented
+                        services.AddScoped<IAnyExcelReader, AnyExcelRead>(); // Already implemented
+                        services.AddScoped<IPdfTableReader, ReadFromPdf>(); // Implemented
+                        services.AddScoped<IPdfFormReader, ReadFromPdfForm>(); // Already implemented
                         
                         // File Writing Services with interfaces
                         services.AddScoped<IPdfFormWriter, WriteToPdfForm>(); // Implemented

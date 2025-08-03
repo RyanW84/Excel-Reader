@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;

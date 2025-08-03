@@ -5,7 +5,7 @@ using OfficeOpenXml;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class ReadFromCsv(IFilePathService filePathManager, INotificationService userNotifier) : ICsvFileReader
+public class ReadFromCsv(IFilePathService filePathManager, INotificationService userNotifier)
 {
     private readonly IFilePathService _filePathManager = filePathManager;
     private readonly INotificationService _userNotifier = userNotifier;
