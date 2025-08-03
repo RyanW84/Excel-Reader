@@ -1,11 +1,11 @@
 using System.Data;
 using System.Data.SqlClient;
-
+using ExcelReader.RyanW84.Abstractions;
 using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Helpers;
 
-public class TableExistence
+public class TableExistence : ITableManager
 {
     private readonly IConfiguration _configuration;
 
@@ -26,11 +26,9 @@ public class TableExistence
         var checkTableSql =
             $"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='{dataTable.TableName}' AND xtype='U') "
             + $"CREATE TABLE [{dataTable.TableName}] ({string.Join(", ", columnDefs)})";
-        
-        using (var command = new SqlCommand(checkTableSql, connection))
-        {
-            command.ExecuteNonQuery();
-        }
+
+        using var command = new SqlCommand(checkTableSql, connection);
+        command.ExecuteNonQuery();
     }
 
     public void EnsureTableExists(DataTable dataTable)

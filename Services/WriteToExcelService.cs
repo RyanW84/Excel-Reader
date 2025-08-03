@@ -1,8 +1,9 @@
+using ExcelReader.RyanW84.Abstractions;
 using OfficeOpenXml;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class WriteToExcelService
+public class WriteToExcelService : IExcelWriteService
 {
     public void WriteFieldsToExcel(string filePath, Dictionary<string, string> fieldValues)
     {

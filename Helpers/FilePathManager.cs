@@ -1,20 +1,14 @@
+using ExcelReader.RyanW84.Abstractions;
 using Spectre.Console;
+using FileType = ExcelReader.RyanW84.Abstractions.FileType;
 
 namespace ExcelReader.RyanW84.Helpers;
 
 /// <summary>
-/// Manages file path operations with comprehensive validation and exception handling
+/// File path service implementation following SOLID principles
 /// </summary>
-public class FilePathManager
+public class FilePathManager : IFilePathService
 {
-    public enum FileType
-    {
-        Excel,
-        PDF,
-        CSV,
-        Generic
-    }
-
     private static readonly Dictionary<FileType, string> DefaultPaths = new()
     {
         { FileType.Excel, @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx" },
@@ -90,12 +84,30 @@ public class FilePathManager
         }
     }
 
-    private string GetDefaultPath(FileType fileType)
+    /// <summary>
+    /// Checks if a file path is valid without throwing exceptions
+    /// </summary>
+    /// <param name="filePath">The file path to check</param>
+    /// <returns>True if valid, false otherwise</returns>
+    public bool IsValidPath(string filePath)
+    {
+        try
+        {
+            ValidateFilePath(filePath, FileType.Generic);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string GetDefaultPath(FileType fileType)
     {
         return DefaultPaths.TryGetValue(fileType, out var path) ? path : string.Empty;
     }
 
-    private string GetFileTypeName(FileType fileType)
+    private static string GetFileTypeName(FileType fileType)
     {
         return fileType switch
         {

@@ -3,33 +3,28 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using ExcelReader.RyanW84.Helpers;
+using ExcelReader.RyanW84.Abstractions;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class ReadFromPdf
+public class ReadFromPdf(FilePathManager filePathManager , UserNotifier userNotifier)
 {
-    private readonly FilePathManager _filePathManager;
-    private readonly UserNotifier _userNotifier;
+    private readonly FilePathManager _filePathManager = filePathManager;
+    private readonly UserNotifier _userNotifier = userNotifier;
 
-    public ReadFromPdf(FilePathManager filePathManager, UserNotifier userNotifier)
-    {
-        _filePathManager = filePathManager;
-        _userNotifier = userNotifier;
-    }
-
-    public async Task<List<string[]>> ReadPdfFileAsync()
+	public async Task<List<string[]>> ReadPdfFileAsync()
     {
         string filePath;
         try
         {
             // Use a custom default path for PDF table files
             var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\TablePDF.pdf";
-            filePath = _filePathManager.GetFilePath(FilePathManager.FileType.PDF, customDefault);
+            filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
         }
         catch (FilePathValidationException ex)
         {
             _userNotifier.ShowError($"PDF file path error: {ex.Message}");
-            return new List<string[]>();
+            return [];
         }
 
         _userNotifier.ShowInfo($"Opening {filePath}");
@@ -64,7 +59,7 @@ public class ReadFromPdf
         return ReadPdfFileAsync().GetAwaiter().GetResult();
     }
 
-    public async Task<DataTable> ConvertToDataTableAsync(List<string[]> pdfData)
+    public static async Task<DataTable> ConvertToDataTableAsync(List<string[]> pdfData)
     {
         return await Task.Run(() =>
         {
@@ -94,7 +89,7 @@ public class ReadFromPdf
     }
 
     // Keep synchronous version for backward compatibility
-    public DataTable ConvertToDataTable(List<string[]> pdfData)
+    public static DataTable ConvertToDataTable(List<string[]> pdfData)
     {
         return ConvertToDataTableAsync(pdfData).GetAwaiter().GetResult();
     }

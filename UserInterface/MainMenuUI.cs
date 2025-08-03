@@ -2,15 +2,16 @@
 
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
+using ExcelReader.RyanW84.Abstractions;
 using Spectre.Console;
 
 namespace ExcelReader.RyanW84.UserInterface;
 
 public class MainMenuUI(
     ExcelWriteController excelWriteController,
-    AnyExcelRead anyExcelRead,
+    IAnyExcelReader anyExcelRead,
     PdfFormWriteController pdfFormWriteController,
-    ReadFromPdfForm readFromPdfForm,
+    IPdfFormReader readFromPdfForm,
     CsvController csvController,
     AnyExcelReadController anyExcelReadController,
     ExcelBeginnerController excelBeginnerController,
@@ -19,9 +20,9 @@ public class MainMenuUI(
 )
 {
     private readonly ExcelWriteController _excelWriteController = excelWriteController;
-    private readonly AnyExcelRead _anyExcelRead = anyExcelRead;
+    private readonly IAnyExcelReader _anyExcelRead = anyExcelRead;
     private readonly PdfFormWriteController _pdfFormWriteController = pdfFormWriteController;
-    private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
+    private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm;
     private readonly CsvController _csvController = csvController;
     private readonly AnyExcelReadController _anyExcelReadController = anyExcelReadController;
     private readonly ExcelBeginnerController _excelBeginnerController = excelBeginnerController;

@@ -1,21 +1,26 @@
 using System.Data;
+using ExcelReader.RyanW84.Abstractions;
 using ExcelReader.RyanW84.Data;
-using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Models;
 using ExcelReader.RyanW84.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class ExcelBeginnerController(
-    ExcelBeginnerService excelBeginnerService,
-    ExcelReaderDbContext dbContext,
-    UserNotifier userNotifier
-)
+public class ExcelBeginnerController
 {
-    private readonly ExcelBeginnerService _excelBeginnerService = excelBeginnerService;
-    private readonly ExcelReaderDbContext _dbContext = dbContext;
-    private readonly UserNotifier _userNotifier = userNotifier;
+    private readonly IExcelBeginnerService _excelBeginnerService;
+    private readonly ExcelReaderDbContext _dbContext;
+    private readonly INotificationService _userNotifier;
+
+    public ExcelBeginnerController(
+        IExcelBeginnerService excelBeginnerService,
+        ExcelReaderDbContext dbContext,
+        INotificationService userNotifier)
+    {
+        _excelBeginnerService = excelBeginnerService;
+        _dbContext = dbContext;
+        _userNotifier = userNotifier;
+    }
 
     // Orchestrator method for all steps
     public async Task AddDataFromExcel()
@@ -40,7 +45,9 @@ public class ExcelBeginnerController(
         _dbContext.ExcelBeginner.AddRange(excelBeginners);
         await _dbContext.SaveChangesAsync();
 
-        _userNotifier.ShowSuccess($"ExcelBeginner import complete. Imported {excelBeginners.Count} records.");
+        _userNotifier.ShowSuccess(
+            $"ExcelBeginner import complete. Imported {excelBeginners.Count} records."
+        );
     }
 
     private List<ExcelBeginner> ConvertDataTableToModels(DataTable dataTable)
@@ -55,7 +62,7 @@ public class ExcelBeginnerController(
                 Age = GetIntValue(row, "age"),
                 Sex = GetStringValue(row, "sex"),
                 Colour = GetStringValue(row, "colour"),
-                Height = GetStringValue(row, "height")
+                Height = GetStringValue(row, "height"),
             };
 
             // Skip rows with empty required fields

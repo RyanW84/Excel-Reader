@@ -1,72 +1,69 @@
 // Ignore Spelling: Pdf
 
+using ExcelReader.RyanW84.Abstractions;
 using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UserInterface;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class PdfFormController
+public class PdfFormController(
+	ReadFromPdfForm readFromPdfForm ,
+	WriteToPdfForm writeToPdfForm ,
+	WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService ,
+	FieldInputUi fieldInputUi ,
+	IFilePathService filePathManager ,
+	INotificationService notificationService
+	)
 {
-    private readonly ReadFromPdfForm _readFromPdfForm;
-    private readonly WriteToPdfForm _writeToPdfForm;
-    private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService;
-    private readonly FieldInputUi _fieldInputUi;
-    private readonly FilePathManager _filePathManager;
-    private readonly UserNotifier _userNotifier;
+    private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
+    private readonly WriteToPdfForm _writeToPdfForm = writeToPdfForm;
+    private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
+    private readonly FieldInputUi _fieldInputUi = fieldInputUi;
+    private readonly IFilePathService _filePathManager = filePathManager;
+    private readonly INotificationService _notificationService = notificationService;
 
-    public PdfFormController(
-        ReadFromPdfForm readFromPdfForm,
-        WriteToPdfForm writeToPdfForm,
-        WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
-        FieldInputUi fieldInputUi,
-        FilePathManager filePathManager,
-        UserNotifier userNotifier
-    )
-    {
-        _readFromPdfForm = readFromPdfForm;
-        _writeToPdfForm = writeToPdfForm;
-        _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
-        _fieldInputUi = fieldInputUi;
-        _filePathManager = filePathManager;
-        _userNotifier = userNotifier;
-    }
-
-    public async Task AddOrUpdateDataFromPdfForm(string? filePath = null)
+	public async Task AddOrUpdateDataFromPdfForm()
     {
         // 1. Get the file path using FilePathManager
-        string selectedPath;
+
+        string filePath;
         try
         {
-            selectedPath = _filePathManager.GetFilePath(FilePathManager.FileType.PDF, filePath);
+            var customDefault =
+                @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\FillablePDF.pdf";
+            filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
         }
         catch (FilePathValidationException ex)
         {
-            _userNotifier.ShowError($"PDF file path error: {ex.Message}");
+            _notificationService.ShowError($"PDF file path error: {ex.Message}");
             return;
         }
 
         // 2. Read existing fields from PDF
-        var fields = await _readFromPdfForm.ReadFormFieldsAsync(selectedPath);
+        var fields = await _readFromPdfForm.ReadFormFieldsAsync(filePath);
         if (fields.Count == 0)
         {
-            _userNotifier.ShowError("No form fields found or file not found.");
+            _notificationService.ShowError("No form fields found or file not found.");
             return;
         }
 
         // 3. Pass fields to unified UI for user to update
         // Async usage:
-        var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(fields, FieldInputUi.FileType.PDF);
+        var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(
+            fields,
+            FileType.PDF
+        );
 
         // Or backward compatible:
         // var updatedFields = _fieldInputUi.GatherUpdatedFields(fields, FieldInputUi.FileType.PDF);
 
         // 4. Write updated fields back to PDF form
-        await _writeToPdfForm.WriteFormFieldsAsync(selectedPath, updatedFields);
+        await _writeToPdfForm.WriteFormFieldsAsync(filePath, updatedFields);
 
         // 5. Add updated data to the database
         await _writePdfFormDataToDatabaseService.WriteAsync(updatedFields);
 
-        _userNotifier.ShowSuccess("PDF form updated and data imported to SQL table.");
+        _notificationService.ShowSuccess("PDF form updated and data imported to SQL table.");
     }
 }

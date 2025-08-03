@@ -6,11 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ExcelReader.RyanW84.Data
 {
-    public class ExcelReaderDbContext : DbContext
+    public class ExcelReaderDbContext(DbContextOptions<ExcelReaderDbContext> options) : DbContext(options)
     {
-        public ExcelReaderDbContext(DbContextOptions<ExcelReaderDbContext> options) : base(options) { }
-
-        public DbSet<ExcelBeginner> ExcelBeginner { get; set; }
+		public DbSet<ExcelBeginner> ExcelBeginner { get; set; }
 
         public static ILoggerFactory GetLoggerFactory()
         {

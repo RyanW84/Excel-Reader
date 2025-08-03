@@ -1,12 +1,12 @@
 ﻿using System.Data;
+using ExcelReader.RyanW84.Abstractions;
 
-namespace ExcelReader.RyanW84.Helpers; 
-
+namespace ExcelReader.RyanW84.Helpers;
 
 /// <summary>
 /// Provides a method to convert a dictionary of string/object pairs to a DataTable.
 /// </summary>
-public class DictionaryToDataTableConverter
+public class DictionaryToDataTableConverter : IDataTableService
 {
     /// <summary>
     /// Converts a Dictionary<string, object> to a DataTable with one row.

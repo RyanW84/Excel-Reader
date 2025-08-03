@@ -1,35 +1,28 @@
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.Helpers;
+using ExcelReader.RyanW84.Abstractions;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class PdfTableController
+public class PdfTableController(ExcelReaderDbContext dbContext , ReadFromPdf readFromPdf , CreateTableFromCSV createTableFromCSV )
 {
-	private readonly ExcelReaderDbContext _dbContext;
-	private readonly ReadFromPdf _readFromPdf;
-	private readonly CreateTableFromCSV _createTableFromCSV;
-	private readonly UserNotifier _userNotifier;
-
-	public PdfTableController(ExcelReaderDbContext dbContext , ReadFromPdf readFromPdf , CreateTableFromCSV createTableFromCSV , UserNotifier userNotifier)
-	{
-		_dbContext = dbContext;
-		_readFromPdf = readFromPdf;
-		_createTableFromCSV = createTableFromCSV;
-		_userNotifier = userNotifier;
-	}
+	private readonly ExcelReaderDbContext _dbContext = dbContext;
+	private readonly ReadFromPdf _readFromPdf = readFromPdf;
+	private readonly CreateTableFromCSV _createTableFromCSV = createTableFromCSV;
+	private readonly INotificationService _notificationService;
 
 	public async Task AddDataFromPdf( )
 	{
-		_userNotifier.ShowInfo("Starting PDF import...");
+		_notificationService.ShowInfo("Starting PDF import...");
 		var pdfData = await _readFromPdf.ReadPdfFileAsync();
-		var dataTable = await _readFromPdf.ConvertToDataTableAsync(pdfData);
-		_userNotifier.ShowInfo($"Read {dataTable.Rows.Count} Rows from PDF file.");
-		_userNotifier.ShowInfo($"Read {dataTable.Columns.Count} Columns from PDF file.");
+		var dataTable = await ReadFromPdf.ConvertToDataTableAsync(pdfData);
+		_notificationService.ShowInfo($"Read {dataTable.Rows.Count} Rows from PDF file.");
+		_notificationService.ShowInfo($"Read {dataTable.Columns.Count} Columns from PDF file.");
 
 		dataTable.TableName = "PdfImport";
 		await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
 		await _dbContext.SaveChangesAsync();
-		_userNotifier.ShowSuccess("PDF import complete.");
+		_notificationService.ShowSuccess("PDF import complete.");
 	}
 }

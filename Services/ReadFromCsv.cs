@@ -1,32 +1,27 @@
 ﻿using System.Data;
-using System.IO;
-using OfficeOpenXml;
+using ExcelReader.RyanW84.Abstractions;
 using ExcelReader.RyanW84.Helpers;
+using OfficeOpenXml;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class ReadFromCsv
+public class ReadFromCsv(IFilePathService filePathManager, INotificationService userNotifier)
 {
-    private readonly FilePathManager _filePathManager;
-    private readonly UserNotifier _userNotifier;
+    private readonly IFilePathService _filePathManager = filePathManager;
+    private readonly INotificationService _userNotifier = userNotifier;
 
-    public ReadFromCsv(FilePathManager filePathManager, UserNotifier userNotifier)
-    {
-        _filePathManager = filePathManager;
-        _userNotifier = userNotifier;
-    }
-
-    public async Task<List<string[]>> ReadCsvFile()
+	public async Task<List<string[]>> ReadCsvFile()
     {
         string filePath;
         try
         {
-            filePath = _filePathManager.GetFilePath(FilePathManager.FileType.CSV);
+			var customDefault = "C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\ExcelCSV.CSV";
+			filePath = _filePathManager.GetFilePath(FileType.CSV, customDefault);
         }
         catch (FilePathValidationException ex)
         {
             _userNotifier.ShowError($"CSV file path error: {ex.Message}");
-            return new List<string[]>();
+            return [];
         }
         _userNotifier.ShowInfo($"Opening {filePath}");
 
@@ -47,7 +42,7 @@ public class ReadFromCsv
         return csvData;
     }
 
-    public async Task<DataTable> ConvertToDataTableAsync(List<string[]> csvData)
+    public static async Task<DataTable> ConvertToDataTableAsync(List<string[]> csvData)
     {
         return await Task.Run(() =>
         {
@@ -73,7 +68,7 @@ public class ReadFromCsv
     }
 
     // Keep synchronous version for backward compatibility
-    public DataTable ConvertToDataTable(List<string[]> csvData)
+    public static DataTable ConvertToDataTable(List<string[]> csvData)
     {
         return ConvertToDataTableAsync(csvData).GetAwaiter().GetResult();
     }

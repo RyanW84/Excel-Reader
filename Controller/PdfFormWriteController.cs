@@ -1,46 +1,48 @@
 using System.Data;
 using System.Data.SqlClient;
 using ExcelReader.RyanW84.Data;
-using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UserInterface;
 using Microsoft.Extensions.Configuration;
+using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Controller;
 
 public class PdfFormWriteController(
     IConfiguration configuration,
     ExcelReaderDbContext dbContext,
-    ReadFromPdfForm readFromPdfForm,
-    WriteToPdfForm writeToPdfForm,
-    WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
-    FieldInputUi fieldInputUi,
-    TableExistence tableExistenceService,
-    UserNotifier userNotifier,
-    FilePathManager filePathManager
+    IPdfFormReader readFromPdfForm,
+    IPdfFormWriter writeToPdfForm,
+    IPdfFormDatabaseService writePdfFormDataToDatabaseService,
+    IFieldInputService fieldInputUi,
+    ITableManager tableExistenceService,
+    INotificationService userNotifier,
+    IFilePathService filePathManager
 )
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ExcelReaderDbContext _dbContext = dbContext;
-    private readonly WriteToPdfForm _writeToPdfForm = writeToPdfForm;
-    private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
-    private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService =
+    private readonly IPdfFormWriter _writeToPdfForm = writeToPdfForm;
+    private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm;
+    private readonly IPdfFormDatabaseService _writePdfFormDataToDatabaseService =
         writePdfFormDataToDatabaseService;
-    private readonly FieldInputUi _fieldInputUi = fieldInputUi;
-    private readonly TableExistence _tableExistenceService = tableExistenceService;
-    private readonly UserNotifier _userNotifier = userNotifier;
-    private readonly FilePathManager _filePathManager = filePathManager;
+    private readonly IFieldInputService _fieldInputUi = fieldInputUi;
+    private readonly ITableManager _tableExistenceService = tableExistenceService;
+    private readonly INotificationService _userNotifier = userNotifier;
+    private readonly IFilePathService _filePathManager = filePathManager;
 
     // Orchestrator method for all PDF form write steps
     public async Task UpdatePdfFormAndDatabaseAsync()
     {
         try
         {
-            // 1. Get file path from user via FilePathManager
-            var filePath = _filePathManager.GetFilePath(FilePathManager.FileType.PDF);
+			// 1. Get file path from user via FilePathManager
+			var customDefault = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\TablePDF.pdf";
+			var filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
 
-            // 2. Get existing field values from PDF
-            var existingFields = GetExistingFieldValues(filePath);
+			// 2. Get existing field values from PDF
+			var existingFields = GetExistingFieldValues(filePath);
             if (existingFields.Count == 0)
             {
                 _userNotifier.ShowError("No form fields found or file not found.");
@@ -128,7 +130,7 @@ public class PdfFormWriteController(
 
     public Dictionary<string, string> GetUpdatedFieldValues(Dictionary<string, string> fieldValues)
     {
-        return _fieldInputUi.GatherUpdatedFields(fieldValues, FieldInputUi.FileType.PDF);
+        return _fieldInputUi.GatherUpdatedFields(fieldValues, FileType.PDF);
     }
 
     public async Task WriteDataToPdfFormAsync(string filePath, Dictionary<string, string> fieldValues)

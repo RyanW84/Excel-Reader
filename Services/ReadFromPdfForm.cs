@@ -1,10 +1,11 @@
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
+using ExcelReader.RyanW84.Abstractions;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class ReadFromPdfForm
+public class ReadFromPdfForm : IPdfFormReader
 {
     public async Task<Dictionary<string, string>> ReadFormFieldsAsync(string filePath)
     {

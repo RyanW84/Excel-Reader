@@ -1,26 +1,22 @@
 using System.Data;
 using ExcelReader.RyanW84.Helpers;
 using OfficeOpenXml;
+using ExcelReader.RyanW84.Abstractions;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class AnyExcelRead
+public class AnyExcelRead(IFilePathService filePathManager , INotificationService userNotifier) : IAnyExcelReader
 {
-    private readonly FilePathManager _filePathManager;
-    private readonly UserNotifier _userNotifier;
+    private readonly IFilePathService _filePathManager = filePathManager;
+    private readonly INotificationService _userNotifier = userNotifier;
 
-    public AnyExcelRead(FilePathManager filePathManager, UserNotifier userNotifier)
-    {
-        _filePathManager = filePathManager;
-        _userNotifier = userNotifier;
-    }
-
-    public async Task<DataTable> ReadFromExcelAsync()
+	public async Task<DataTable> ReadFromExcelAsync()
     {
         string filePath;
         try
-        {
-            filePath = _filePathManager.GetFilePath(FilePathManager.FileType.Excel);
+		{
+			var customDefault = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\ExcelDynamic.Xlsx";
+			filePath = _filePathManager.GetFilePath(FileType.Excel, customDefault);
         }
         catch (FilePathValidationException ex)
         {

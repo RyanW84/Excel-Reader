@@ -1,9 +1,15 @@
+using ExcelReader.RyanW84.Abstractions;
+using Spectre.Console;
+
 namespace ExcelReader.RyanW84.Helpers;
 
-public class UserNotifier
+/// <summary>
+/// Notification service implementation following SOLID principles
+/// </summary>
+public class UserNotifier : INotificationService
 {
-    public void ShowSuccess(string message) => Spectre.Console.AnsiConsole.MarkupLine($"[green]{message}[/]");
-    public void ShowError(string message) => Spectre.Console.AnsiConsole.MarkupLine($"[red]{message}[/]");
-    public void ShowWarning(string message) => Spectre.Console.AnsiConsole.MarkupLine($"[yellow]{message}[/]");
-    public void ShowInfo(string message) => Spectre.Console.AnsiConsole.MarkupLine(message);
+    public void ShowSuccess(string message) => AnsiConsole.MarkupLine($"[green]{message}[/]");
+    public void ShowError(string message) => AnsiConsole.MarkupLine($"[red]{message}[/]");
+    public void ShowWarning(string message) => AnsiConsole.MarkupLine($"[yellow]{message}[/]");
+    public void ShowInfo(string message) => AnsiConsole.MarkupLine(message);
 }

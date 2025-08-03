@@ -1,15 +1,15 @@
+using ExcelReader.RyanW84.Abstractions;
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
-using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class WriteToPdfForm
+public class WriteToPdfForm : IPdfFormWriter
 {
-    private readonly UserNotifier _userNotifier;
+    private readonly INotificationService _userNotifier;
 
-    public WriteToPdfForm(UserNotifier userNotifier)
+    public WriteToPdfForm(INotificationService userNotifier)
     {
         _userNotifier = userNotifier;
     }
@@ -45,7 +45,10 @@ public class WriteToPdfForm
             {
                 var field = fields[kvp.Key];
                 // Special handling for the "wanted" checkbox
-                if (kvp.Key.Equals("wanted", StringComparison.OrdinalIgnoreCase) && field is PdfButtonFormField)
+                if (
+                    kvp.Key.Equals("wanted", StringComparison.OrdinalIgnoreCase)
+                    && field is PdfButtonFormField
+                )
                 {
                     if (kvp.Value.Equals("Yes", StringComparison.OrdinalIgnoreCase))
                         ((PdfButtonFormField)field).SetValue("Yes");

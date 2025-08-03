@@ -2,25 +2,26 @@ using System.Data;
 using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UserInterface;
+using ExcelReader.RyanW84.Abstractions;
 
 namespace ExcelReader.RyanW84.Controller;
 
 public class ExcelWriteController(
-    WriteToExcelService writeToExcelService,
-    AnyExcelRead anyExcelRead,
-    FieldInputUi fieldInputUi,
-    WriteUpdatedExcelDataToDatabase writeUpdatedExcelDataToDatabase,
-    UserNotifier userNotifier,
-    FilePathManager filePathManager
+    IExcelWriteService writeToExcelService,
+    IAnyExcelReader anyExcelRead,
+    IFieldInputService fieldInputUi,
+    IExcelDatabaseService writeUpdatedExcelDataToDatabase,
+    INotificationService userNotifier,
+    IFilePathService filePathManager
 )
 {
-    private readonly WriteToExcelService _writeToExcelService = writeToExcelService;
-    private readonly AnyExcelRead _anyExcelRead = anyExcelRead;
-    private readonly FieldInputUi _fieldInputUi = fieldInputUi;
-    private readonly WriteUpdatedExcelDataToDatabase _writeUpdatedExcelDataToDatabase =
+    private readonly IExcelWriteService _writeToExcelService = writeToExcelService;
+    private readonly IAnyExcelReader _anyExcelRead = anyExcelRead;
+    private readonly IFieldInputService _fieldInputUi = fieldInputUi;
+    private readonly IExcelDatabaseService _writeUpdatedExcelDataToDatabase =
         writeUpdatedExcelDataToDatabase;
-    private readonly UserNotifier _userNotifier = userNotifier;
-    private readonly FilePathManager _filePathManager = filePathManager;
+    private readonly INotificationService _userNotifier = userNotifier;
+    private readonly IFilePathService _filePathManager = filePathManager;
 
     // Orchestrator method for all steps
     public async Task UpdateExcelAndDatabaseAsync()
@@ -28,7 +29,9 @@ public class ExcelWriteController(
         try
         {
             // 1. Get file path from user via FilePathManager
-            var filePath = _filePathManager.GetFilePath(FilePathManager.FileType.Excel);
+            // Use a custom default path for Excel files
+            var customDefault = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\ExcelDynamic.Xlsx";
+            var filePath = _filePathManager.GetFilePath(FileType.Excel,customDefault);
 
             // 2. Get existing field values from Excel
             var table = await _anyExcelRead.ReadFromExcelAsync();
@@ -46,10 +49,7 @@ public class ExcelWriteController(
 
             // 3. Update field values interactively using unified UI
             // Async usage:
-            var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(existingFields, FieldInputUi.FileType.Excel);
-
-            // Or backward compatible:
-            // var updatedFields = _fieldInputUi.GatherUpdatedFields(existingFields, FieldInputUi.FileType.Excel);
+            var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(existingFields, FileType.Excel);
 
             // 4. Write updated fields to Excel
             _writeToExcelService.WriteFieldsToExcel(filePath, updatedFields);
