@@ -19,13 +19,13 @@ public class PdfTableController(
     public async Task AddDataFromPdf()
     {
         _notificationService.ShowInfo("Starting PDF import...");
-        var pdfData = await _pdfTableReader.ReadPdfFileAsync();
-        var dataTable = await ReadFromPdf.ConvertToDataTableAsync(pdfData);
+        var pdfData = await _readFromPdf.ReadPdfFileAsync();
+        var dataTable = await _readFromPdf.ConvertToDataTableAsync(pdfData);
         _notificationService.ShowInfo($"Read {dataTable.Rows.Count} Rows from PDF file.");
         _notificationService.ShowInfo($"Read {dataTable.Columns.Count} Columns from PDF file.");
 
         dataTable.TableName = "PdfImport";
-        await _csvTableCreator.CreateTableFromCsvDataAsync(dataTable);
+        await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
         await _dbContext.SaveChangesAsync();
         _notificationService.ShowSuccess("PDF import complete.");
     }
