@@ -65,14 +65,13 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<WriteToExcelService>();
                         services.AddScoped<AnyExcelRead>();
                         services.AddScoped<WritePdfFormDataToDatabaseService>();
-                        services.AddScoped<PdfFormWriteUi>();
                         services.AddScoped<DictionaryToDataTableConverter>();
                         services.AddScoped<WriteUpdatedExcelDataToDatabase>();
-                        services.AddScoped<ExcelUserInputUi>();
                         services.AddScoped<UserNotifier>();
                         services.AddScoped<TableExistenceService>();
                         services.AddScoped<ExcelBeginnerService>();
                         services.AddScoped<FilePathManager>();
+                        services.AddScoped<FieldInputUi>();
                     }
                 );
     }

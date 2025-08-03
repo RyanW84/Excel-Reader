@@ -11,7 +11,7 @@ public class PdfFormController
     private readonly ReadFromPdfForm _readFromPdfForm;
     private readonly WriteToPdfForm _writeToPdfForm;
     private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService;
-    private readonly PdfFormWriteUi _pdfFormWriteUi;
+    private readonly FieldInputUi _fieldInputUi;
     private readonly FilePathManager _filePathManager;
     private readonly UserNotifier _userNotifier;
 
@@ -19,7 +19,7 @@ public class PdfFormController
         ReadFromPdfForm readFromPdfForm,
         WriteToPdfForm writeToPdfForm,
         WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
-        PdfFormWriteUi pdfFormWriteUi,
+        FieldInputUi fieldInputUi,
         FilePathManager filePathManager,
         UserNotifier userNotifier
     )
@@ -27,7 +27,7 @@ public class PdfFormController
         _readFromPdfForm = readFromPdfForm;
         _writeToPdfForm = writeToPdfForm;
         _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
-        _pdfFormWriteUi = pdfFormWriteUi;
+        _fieldInputUi = fieldInputUi;
         _filePathManager = filePathManager;
         _userNotifier = userNotifier;
     }
@@ -54,8 +54,12 @@ public class PdfFormController
             return;
         }
 
-        // 3. Pass fields to UI for user to update
-        var updatedFields = _pdfFormWriteUi.GatherUpdatedFields(fields);
+        // 3. Pass fields to unified UI for user to update
+        // Async usage:
+        var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(fields, FieldInputUi.FileType.PDF);
+
+        // Or backward compatible:
+        // var updatedFields = _fieldInputUi.GatherUpdatedFields(fields, FieldInputUi.FileType.PDF);
 
         // 4. Write updated fields back to PDF form
         await _writeToPdfForm.WriteFormFieldsAsync(selectedPath, updatedFields);

@@ -14,7 +14,7 @@ public class PdfFormWriteController(
     ReadFromPdfForm readFromPdfForm,
     WriteToPdfForm writeToPdfForm,
     WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
-    PdfFormWriteUi pdfFormWriteUi,
+    FieldInputUi fieldInputUi,
     TableExistenceService tableExistenceService,
     UserNotifier userNotifier,
     FilePathManager filePathManager
@@ -26,7 +26,7 @@ public class PdfFormWriteController(
     private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
     private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService =
         writePdfFormDataToDatabaseService;
-    private readonly PdfFormWriteUi _pdfFormWriteUi = pdfFormWriteUi;
+    private readonly FieldInputUi _fieldInputUi = fieldInputUi;
     private readonly TableExistenceService _tableExistenceService = tableExistenceService;
     private readonly UserNotifier _userNotifier = userNotifier;
     private readonly FilePathManager _filePathManager = filePathManager;
@@ -47,7 +47,7 @@ public class PdfFormWriteController(
                 return;
             }
 
-            // 3. Get updated field values from user interaction
+            // 3. Get updated field values from user interaction using unified UI
             var updatedFields = GetUpdatedFieldValues(existingFields);
 
             // 4. Write updated fields to PDF form
@@ -128,7 +128,7 @@ public class PdfFormWriteController(
 
     public Dictionary<string, string> GetUpdatedFieldValues(Dictionary<string, string> fieldValues)
     {
-        return _pdfFormWriteUi.GatherUpdatedFields(fieldValues);
+        return _fieldInputUi.GatherUpdatedFields(fieldValues, FieldInputUi.FileType.PDF);
     }
 
     public async Task WriteDataToPdfFormAsync(string filePath, Dictionary<string, string> fieldValues)

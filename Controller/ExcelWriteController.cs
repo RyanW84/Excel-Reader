@@ -8,7 +8,7 @@ namespace ExcelReader.RyanW84.Controller;
 public class ExcelWriteController(
     WriteToExcelService writeToExcelService,
     AnyExcelRead anyExcelRead,
-    ExcelUserInputUi excelUserInputUi,
+    FieldInputUi fieldInputUi,
     WriteUpdatedExcelDataToDatabase writeUpdatedExcelDataToDatabase,
     UserNotifier userNotifier,
     FilePathManager filePathManager
@@ -16,7 +16,7 @@ public class ExcelWriteController(
 {
     private readonly WriteToExcelService _writeToExcelService = writeToExcelService;
     private readonly AnyExcelRead _anyExcelRead = anyExcelRead;
-    private readonly ExcelUserInputUi _excelUserInputUi = excelUserInputUi;
+    private readonly FieldInputUi _fieldInputUi = fieldInputUi;
     private readonly WriteUpdatedExcelDataToDatabase _writeUpdatedExcelDataToDatabase =
         writeUpdatedExcelDataToDatabase;
     private readonly UserNotifier _userNotifier = userNotifier;
@@ -44,8 +44,12 @@ public class ExcelWriteController(
                     table.Rows[0][col.ColumnName]?.ToString() ?? string.Empty;
             }
 
-            // 3. Update field values interactively
-            var updatedFields = _excelUserInputUi.UpdateFieldValues(existingFields);
+            // 3. Update field values interactively using unified UI
+            // Async usage:
+            var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(existingFields, FieldInputUi.FileType.Excel);
+
+            // Or backward compatible:
+            // var updatedFields = _fieldInputUi.GatherUpdatedFields(existingFields, FieldInputUi.FileType.Excel);
 
             // 4. Write updated fields to Excel
             _writeToExcelService.WriteFieldsToExcel(filePath, updatedFields);
