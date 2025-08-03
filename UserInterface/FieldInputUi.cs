@@ -17,6 +17,20 @@ public class FieldInputUi
     }
 
     /// <summary>
+    /// Async method to gather updated field values from user input.
+    /// Works for both Excel and PDF scenarios.
+    /// </summary>
+    /// <param name="existingFields">Dictionary of current field values</param>
+    /// <param name="fileType">Type of file being processed (for display messages)</param>
+    /// <returns>Dictionary of updated field values</returns>
+    public async Task<Dictionary<string, string>> GatherUpdatedFieldsAsync(
+        Dictionary<string, string> existingFields, 
+        FileType fileType = FileType.Generic)
+    {
+        return await Task.Run(() => GatherUpdatedFields(existingFields, fileType));
+    }
+
+    /// <summary>
     /// Generic method to gather updated field values from user input.
     /// Works for both Excel and PDF scenarios.
     /// </summary>
@@ -71,6 +85,14 @@ public class FieldInputUi
         RecalculateAge(fieldValues, ageFieldName, dobValue, existingFields);
         
         return fieldValues;
+    }
+
+    /// <summary>
+    /// Async version of GetFilePath
+    /// </summary>
+    public async Task<string> GetFilePathAsync(string defaultPath, FileType fileType = FileType.Generic)
+    {
+        return await Task.Run(() => GetFilePath(defaultPath, fileType));
     }
 
     /// <summary>

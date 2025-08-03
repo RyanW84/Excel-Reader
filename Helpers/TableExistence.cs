@@ -1,14 +1,15 @@
 using System.Data;
 using System.Data.SqlClient;
+
 using Microsoft.Extensions.Configuration;
 
-namespace ExcelReader.RyanW84.Services;
+namespace ExcelReader.RyanW84.Helpers;
 
-public class TableExistenceService
+public class TableExistence
 {
     private readonly IConfiguration _configuration;
 
-    public TableExistenceService(IConfiguration configuration)
+    public TableExistence(IConfiguration configuration)
     {
         _configuration = configuration;
     }

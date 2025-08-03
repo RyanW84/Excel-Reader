@@ -30,7 +30,7 @@ namespace ExcelReader.RyanW84
                 services.GetRequiredService<CsvController>(),
                 services.GetRequiredService<AnyExcelReadController>(),
                 services.GetRequiredService<ExcelBeginnerController>(),
-                services.GetRequiredService<PdfController>(),
+                services.GetRequiredService<PdfTableController>(),
                 services.GetRequiredService<PdfFormController>()
             );
             mainMenu.ShowMenuAsync();
@@ -52,7 +52,7 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<AnyExcelReadController>();
                         services.AddScoped<ExcelWriteController>();
                         services.AddScoped<CsvController>();
-                        services.AddScoped<PdfController>();
+                        services.AddScoped<PdfTableController>();
                         services.AddScoped<PdfFormController>();
                         services.AddScoped<ReadFromCsv>();
                         services.AddScoped<CreateTableFromCSV>();
@@ -68,7 +68,7 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<DictionaryToDataTableConverter>();
                         services.AddScoped<WriteUpdatedExcelDataToDatabase>();
                         services.AddScoped<UserNotifier>();
-                        services.AddScoped<TableExistenceService>();
+                        services.AddScoped<TableExistence>();
                         services.AddScoped<ExcelBeginnerService>();
                         services.AddScoped<FilePathManager>();
                         services.AddScoped<FieldInputUi>();

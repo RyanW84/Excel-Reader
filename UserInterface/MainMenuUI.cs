@@ -14,7 +14,7 @@ public class MainMenuUI(
     CsvController csvController,
     AnyExcelReadController anyExcelReadController,
     ExcelBeginnerController excelBeginnerController,
-    PdfController pdfController,
+    PdfTableController pdfController,
     PdfFormController pdfFormController
 )
 {
@@ -25,7 +25,7 @@ public class MainMenuUI(
     private readonly CsvController _csvController = csvController;
     private readonly AnyExcelReadController _anyExcelReadController = anyExcelReadController;
     private readonly ExcelBeginnerController _excelBeginnerController = excelBeginnerController;
-    private readonly PdfController _pdfController = pdfController;
+    private readonly PdfTableController _pdfController = pdfController;
     private readonly PdfFormController _pdfFormController = pdfFormController;
 
     public async Task ShowMenuAsync()

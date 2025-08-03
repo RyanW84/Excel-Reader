@@ -1,9 +1,10 @@
 ﻿using System.Data;
 using System.Text;
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace ExcelReader.RyanW84.Services;
+namespace ExcelReader.RyanW84.Helpers;
 
 public class CreateTableFromPdfForm(IConfiguration configuration)
 {

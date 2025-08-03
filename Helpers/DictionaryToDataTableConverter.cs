@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace ExcelReader.RyanW84.Services; 
+namespace ExcelReader.RyanW84.Helpers; 
 
 
 /// <summary>

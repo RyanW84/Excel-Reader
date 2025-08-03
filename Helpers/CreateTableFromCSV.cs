@@ -1,9 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+
 using System.Data;
 using System.Text;
 
-namespace ExcelReader.RyanW84.Services;
+namespace ExcelReader.RyanW84.Helpers;
 
 public class CreateTableFromCSV
 {

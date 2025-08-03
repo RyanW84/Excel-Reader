@@ -1,8 +1,9 @@
 using System.Data;
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace ExcelReader.RyanW84.Services;
+namespace ExcelReader.RyanW84.Helpers;
 
 public class CreateTableFromAnyExcel(IConfiguration configuration)
 {

@@ -15,7 +15,7 @@ public class PdfFormWriteController(
     WriteToPdfForm writeToPdfForm,
     WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
     FieldInputUi fieldInputUi,
-    TableExistenceService tableExistenceService,
+    TableExistence tableExistenceService,
     UserNotifier userNotifier,
     FilePathManager filePathManager
 )
@@ -27,7 +27,7 @@ public class PdfFormWriteController(
     private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService =
         writePdfFormDataToDatabaseService;
     private readonly FieldInputUi _fieldInputUi = fieldInputUi;
-    private readonly TableExistenceService _tableExistenceService = tableExistenceService;
+    private readonly TableExistence _tableExistenceService = tableExistenceService;
     private readonly UserNotifier _userNotifier = userNotifier;
     private readonly FilePathManager _filePathManager = filePathManager;
 
