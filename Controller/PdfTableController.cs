@@ -1,27 +1,35 @@
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
-using Microsoft.Extensions.Configuration;
+using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class PdfController(IConfiguration configuration, ExcelReaderDbContext dbContext, ReadFromPdf readFromPdf, CreateTableFromCSV createTableFromCSV)
+public class PdfController
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly ExcelReaderDbContext _dbContext = dbContext;
-    private readonly ReadFromPdf _readFromPdf = readFromPdf;
-    private readonly CreateTableFromCSV _createTableFromCSV = createTableFromCSV;
+    private readonly ExcelReaderDbContext _dbContext;
+    private readonly ReadFromPdf _readFromPdf;
+    private readonly CreateTableFromCSV _createTableFromCSV;
+    private readonly UserNotifier _userNotifier;
 
-    public void AddDataFromPdf()
+    public PdfController(ExcelReaderDbContext dbContext, ReadFromPdf readFromPdf, CreateTableFromCSV createTableFromCSV, UserNotifier userNotifier)
     {
-        Console.WriteLine("\nStarting PDF import...");
-        var pdfData = _readFromPdf.ReadPdfFile();
-        var dataTable = _readFromPdf.ConvertToDataTable(pdfData);
-        Console.WriteLine($"Read {dataTable.Rows.Count} Rows from PDF file.");
-        Console.WriteLine($"Read {dataTable.Columns.Count} Columns from PDF file.");
+        _dbContext = dbContext;
+        _readFromPdf = readFromPdf;
+        _createTableFromCSV = createTableFromCSV;
+        _userNotifier = userNotifier;
+    }
+
+    public async Task AddDataFromPdf()
+    {
+        _userNotifier.ShowInfo("Starting PDF import...");
+        var pdfData = await _readFromPdf.ReadPdfFileAsync();
+        var dataTable = await _readFromPdf.ConvertToDataTableAsync(pdfData);
+        _userNotifier.ShowInfo($"Read {dataTable.Rows.Count} Rows from PDF file.");
+        _userNotifier.ShowInfo($"Read {dataTable.Columns.Count} Columns from PDF file.");
 
         dataTable.TableName = "PdfImport";
-        _createTableFromCSV.CreateTableFromCsvData(dataTable);
-        _dbContext.SaveChanges();
-        Console.WriteLine("PDF import complete.");
+        await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
+        await _dbContext.SaveChangesAsync();
+        _userNotifier.ShowSuccess("PDF import complete.");
     }
 }

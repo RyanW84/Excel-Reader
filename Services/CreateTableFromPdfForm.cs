@@ -5,40 +5,35 @@ using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class CreateTableFromPdfForm
+public class CreateTableFromPdfForm(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration = configuration;
 
-    public CreateTableFromPdfForm(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+	public async Task CreateTableFromPdfFormData(DataTable dataTable)
+	{
+		// Create SQL table and insert data
+		var connectionString = _configuration.GetConnectionString("DefaultConnection");
+		using var connection = new SqlConnection(connectionString);
+		await connection.OpenAsync();
 
-    public void CreateTableFromPdfFormData(DataTable dataTable)
-    {
-        // Create SQL table and insert data
-        var connectionString = _configuration.GetConnectionString("DefaultConnection");
-        using var connection = new SqlConnection(connectionString);
-        connection.Open();
+		// Build CREATE TABLE statement
+		var columnDefs = new List<string>();
+		foreach (DataColumn col in dataTable.Columns)
+		{
+			columnDefs.Add($"[{col.ColumnName}] NVARCHAR(MAX)");
+		}
+		var createTableSql =
+			$"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='{dataTable.TableName}') " +
+			$"CREATE TABLE [{dataTable.TableName}] ({string.Join(", " , columnDefs)})";
 
-        // Build CREATE TABLE statement
-        var columnDefs = new List<string>();
-        foreach (DataColumn col in dataTable.Columns)
-        {
-            columnDefs.Add($"[{col.ColumnName}] NVARCHAR(MAX)");
-        }
-        var createTableSql =
-            $"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='{dataTable.TableName}') " +
-            $"CREATE TABLE [{dataTable.TableName}] ({string.Join(", ", columnDefs)})";
+		using (var command = new SqlCommand(createTableSql , connection))
+		{
+			await command.ExecuteNonQueryAsync();
+		}
 
-        using (var command = new SqlCommand(createTableSql, connection))
-        {
-            command.ExecuteNonQuery();
-        }
-
-        // Bulk copy the data
-        using var bulkCopy = new SqlBulkCopy(connection);
-        bulkCopy.DestinationTableName = dataTable.TableName;
-        bulkCopy.WriteToServer(dataTable);
-    }
+		// Bulk copy the data
+		using var bulkCopy = new SqlBulkCopy(connection);
+		bulkCopy.DestinationTableName = dataTable.TableName;
+		await bulkCopy.WriteToServerAsync(dataTable);
+	}
 }

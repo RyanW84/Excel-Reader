@@ -2,70 +2,100 @@ using System.Data;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
-using Microsoft.Extensions.Configuration;
+using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class ReadFromPdf(IConfiguration configuration)
+public class ReadFromPdf
 {
-    private readonly IConfiguration _configuration = configuration;
+    private readonly FilePathManager _filePathManager;
+    private readonly UserNotifier _userNotifier;
 
-    public List<string[]> ReadPdfFile()
+    public ReadFromPdf(FilePathManager filePathManager, UserNotifier userNotifier)
     {
-        string filePath =
-            _configuration["PdfFilePath"]
-            ?? @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\TablePDF.pdf";
-        Console.WriteLine($"opening {filePath}");
+        _filePathManager = filePathManager;
+        _userNotifier = userNotifier;
+    }
+
+    public async Task<List<string[]>> ReadPdfFileAsync()
+    {
+        string filePath;
+        try
+        {
+            // Use a custom default path for PDF table files
+            var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\TablePDF.pdf";
+            filePath = _filePathManager.GetFilePath(FilePathManager.FileType.PDF, customDefault);
+        }
+        catch (FilePathValidationException ex)
+        {
+            _userNotifier.ShowError($"PDF file path error: {ex.Message}");
+            return new List<string[]>();
+        }
+
+        _userNotifier.ShowInfo($"Opening {filePath}");
 
         var pdfData = new List<string[]>();
 
-        if (!File.Exists(filePath))
+        // Offload PDF processing to a background thread since it's CPU-intensive
+        return await Task.Run(() =>
         {
-            Console.WriteLine("PDF file not found.");
-            return pdfData;
-        }
+            using var pdfReader = new PdfReader(filePath);
+            using var pdfDoc = new PdfDocument(pdfReader);
 
-        using var pdfReader = new PdfReader(filePath);
-        using var pdfDoc = new PdfDocument(pdfReader);
-
-        for (int page = 1; page <= pdfDoc.GetNumberOfPages(); page++)
-        {
-            var strategy = new SimpleTextExtractionStrategy();
-            var text = PdfTextExtractor.GetTextFromPage(pdfDoc.GetPage(page), strategy);
-            var lines = text.Split('\n');
-            foreach (var line in lines)
+            for (int page = 1; page <= pdfDoc.GetNumberOfPages(); page++)
             {
-                var rowData = line.Split(','); // Adjust for your delimiter if needed
-                pdfData.Add(rowData);
+                var strategy = new SimpleTextExtractionStrategy();
+                var text = PdfTextExtractor.GetTextFromPage(pdfDoc.GetPage(page), strategy);
+                var lines = text.Split('\n');
+                foreach (var line in lines)
+                {
+                    var rowData = line.Split(','); // Adjust for your delimiter if needed
+                    pdfData.Add(rowData);
+                }
             }
-        }
 
-        return pdfData;
+            return pdfData;
+        });
     }
 
+    // Keep synchronous version for backward compatibility
+    public List<string[]> ReadPdfFile()
+    {
+        return ReadPdfFileAsync().GetAwaiter().GetResult();
+    }
+
+    public async Task<DataTable> ConvertToDataTableAsync(List<string[]> pdfData)
+    {
+        return await Task.Run(() =>
+        {
+            var dataTable = new DataTable();
+
+            if (pdfData == null || pdfData.Count < 2)
+                return dataTable;
+
+            // Assume first row is the title, second row is the column headers
+            // Join the header row into a single string, then split by '_'
+            var headerRow = string.Join(",", pdfData[2]);
+            var columnHeaders = headerRow.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var columnName in columnHeaders)
+            {
+                dataTable.Columns.Add(columnName.Trim());
+            }
+
+            for (int i = 3; i < pdfData.Count; i++)
+            {
+                var dataRow = string.Join(",", pdfData[i]);
+                var readRow = dataRow.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                dataTable.Rows.Add(readRow);
+            }
+            return dataTable;
+        });
+    }
+
+    // Keep synchronous version for backward compatibility
     public DataTable ConvertToDataTable(List<string[]> pdfData)
     {
-        var dataTable = new DataTable();
-
-        if (pdfData == null || pdfData.Count < 2)
-            return dataTable;
-
-        // Assume first row is the title, second row is the column headers
-        // Join the header row into a single string, then split by '_'
-        var headerRow = string.Join(",", pdfData[2]);
-        var columnHeaders = headerRow.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (var columnName in columnHeaders)
-        {
-            dataTable.Columns.Add(columnName.Trim());
-        }
-
-        for (int i = 3; i < pdfData.Count; i++)
-        {
-            var dataRow = string.Join(",", pdfData[i]);
-            var readRow = dataRow.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            dataTable.Rows.Add(readRow);
-        }
-        return dataTable;
+        return ConvertToDataTableAsync(pdfData).GetAwaiter().GetResult();
     }
 }

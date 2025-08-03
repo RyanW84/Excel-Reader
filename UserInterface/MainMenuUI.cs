@@ -4,7 +4,7 @@ using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Services;
 using Spectre.Console;
 
-namespace ExcelReader.RyanW84.UI;
+namespace ExcelReader.RyanW84.UserInterface;
 
 public class MainMenuUI(
     ExcelWriteController excelWriteController,
@@ -34,13 +34,6 @@ public class MainMenuUI(
         AnsiConsole.Write(new Rule("[yellow]FileRead[/]").RuleStyle("yellow").Centered());
         var exit = false;
 
-        string excelFilePath =
-            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx";
-        string pdfFilePath =
-            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
-        string csvFilePath =
-            @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\Sample.csv";
-
         while (!exit)
         {
             AnsiConsole.Write(new Rule("[yellow]FileRead[/]").RuleStyle("yellow").Centered());
@@ -64,61 +57,25 @@ public class MainMenuUI(
             switch (choice)
             {
                 case "Excel: Beginner Import":
-
                     await _excelBeginnerController.AddDataFromExcel();
-
                     break;
                 case "Excel: Dynamic Import":
-                    try
-                    {
-                        await _anyExcelReadController.AddDynamicDataFromExcel();
-                    }
-                    catch (Exception ex)
-                    {
-                        AnsiConsole.MarkupLine($"[red]Error during Excel import: {ex.Message}[/]");
-                    }
+                    await _anyExcelReadController.AddDynamicDataFromExcel();
                     break;
                 case "Excel: Write":
-                  
                     await _excelWriteController.UpdateExcelAndDatabaseAsync();
                     break;
                 case "CSV: Import":
-          
-                    try
-                    {
-                        _csvController.AddDataFromCsv();
-                    }
-                    catch (Exception ex)
-                    {
-                        AnsiConsole.MarkupLine($"[red]Error during CSV import: {ex.Message}[/]");
-                    }
+                    await _csvController.AddDataFromCsv();
                     break;
                 case "PDF: Import":
-                    try
-                    {
-                        _pdfController.AddDataFromPdf();
-                    }
-                    catch (Exception ex)
-                    {
-                        AnsiConsole.MarkupLine($"[red]Error during PDF import: {ex.Message}[/]");
-                    }
+                    await _pdfController.AddDataFromPdf();
                     break;
                 case "PDF: Form Import":
-  
-                    try
-                    {
-                        _pdfFormController.AddOrUpdateDataFromPdfForm();
-                    }
-                    catch (Exception ex)
-                    {
-                        AnsiConsole.MarkupLine(
-                            $"[red]Error during PDF form import: {ex.Message}[/]"
-                        );
-                    }
+                    await _pdfFormController.AddOrUpdateDataFromPdfForm();
                     break;
                 case "PDF: Form Write":
-              
-                    _pdfFormWriteController.UpdatePdfFormAndDatabase();
+                    await _pdfFormWriteController.UpdatePdfFormAndDatabaseAsync();
                     break;
                 case "Exit":
                     exit = true;
@@ -134,6 +91,6 @@ public class MainMenuUI(
         );
         return useExisting
             ? currentPath
-            : AnsiConsole.Ask<string>($"Enter the path to the {fileType}:", currentPath);
+            : AnsiConsole.Ask($"Enter the path to the {fileType}:", currentPath);
     }
 }

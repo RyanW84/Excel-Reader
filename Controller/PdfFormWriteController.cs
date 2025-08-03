@@ -133,7 +133,7 @@ public class PdfFormWriteController(
 
     public async Task WriteDataToPdfFormAsync(string filePath, Dictionary<string, string> fieldValues)
     {
-        _writeToPdfForm.WriteFormFields(filePath, fieldValues);
+        await _writeToPdfForm.WriteFormFieldsAsync(filePath, fieldValues);
         await _dbContext.SaveChangesAsync();
     }
 

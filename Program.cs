@@ -2,7 +2,6 @@
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Services;
-using ExcelReader.RyanW84.UI;
 using ExcelReader.RyanW84.UserInterface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -61,7 +60,6 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<CreateTableFromPdfForm>();
                         services.AddScoped<ReadFromPdf>();
                         services.AddScoped<ReadFromPdfForm>();
-                        services.AddScoped<PdfFormController>();
                         services.AddScoped<WriteToPdfForm>();
                         services.AddScoped<PdfFormWriteController>();
                         services.AddScoped<WriteToExcelService>();
@@ -72,7 +70,6 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<WriteUpdatedExcelDataToDatabase>();
                         services.AddScoped<ExcelUserInputUi>();
                         services.AddScoped<UserNotifier>();
-                        services.AddScoped<PdfFilePathSelector>();
                         services.AddScoped<TableExistenceService>();
                         services.AddScoped<ExcelBeginnerService>();
                         services.AddScoped<FilePathManager>();

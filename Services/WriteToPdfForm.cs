@@ -1,16 +1,30 @@
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
+using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Services;
 
 public class WriteToPdfForm
 {
+    private readonly UserNotifier _userNotifier;
+
+    public WriteToPdfForm(UserNotifier userNotifier)
+    {
+        _userNotifier = userNotifier;
+    }
+
+    public async Task WriteFormFieldsAsync(string filePath, Dictionary<string, string> fieldValues)
+    {
+        await Task.Run(() => WriteFormFields(filePath, fieldValues));
+    }
+
+    // Keep synchronous version for backward compatibility
     public void WriteFormFields(string filePath, Dictionary<string, string> fieldValues)
     {
         if (!File.Exists(filePath))
         {
-            Console.WriteLine($"File not found: {filePath}");
+            _userNotifier.ShowError($"File not found: {filePath}");
             return;
         }
 
@@ -21,7 +35,7 @@ public class WriteToPdfForm
         var form = PdfAcroForm.GetAcroForm(pdfDoc, true);
         if (form == null)
         {
-            Console.WriteLine("No AcroForm found in PDF.");
+            _userNotifier.ShowError("No AcroForm found in PDF.");
             return;
         }
         var fields = form.GetAllFormFields();

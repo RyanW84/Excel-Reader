@@ -76,7 +76,7 @@ public class PdfFormWriteUi
         );
         if (ageFieldName != null)
         {
-            var age = PdfFieldValidator.CalculateAge(dobValue);
+            var age = FieldValidator.CalculateAge(dobValue);
             if (age != null)
             {
                 fieldValues[ageFieldName] = age.ToString();
@@ -105,7 +105,7 @@ public class PdfFormWriteUi
             new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):")
                 .DefaultValue(currentValue)
                 .Validate(date =>
-                    PdfFieldValidator.IsValidDate(date)
+                    FieldValidator.IsValidDate(date)
                         ? ValidationResult.Success()
                         : ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
                 )

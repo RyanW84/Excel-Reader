@@ -12,7 +12,7 @@ public class PdfFormController
     private readonly WriteToPdfForm _writeToPdfForm;
     private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService;
     private readonly PdfFormWriteUi _pdfFormWriteUi;
-    private readonly PdfFilePathSelector _pdfFilePathSelector;
+    private readonly FilePathManager _filePathManager;
     private readonly UserNotifier _userNotifier;
 
     public PdfFormController(
@@ -20,7 +20,7 @@ public class PdfFormController
         WriteToPdfForm writeToPdfForm,
         WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService,
         PdfFormWriteUi pdfFormWriteUi,
-        PdfFilePathSelector pdfFilePathSelector,
+        FilePathManager filePathManager,
         UserNotifier userNotifier
     )
     {
@@ -28,17 +28,26 @@ public class PdfFormController
         _writeToPdfForm = writeToPdfForm;
         _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
         _pdfFormWriteUi = pdfFormWriteUi;
-        _pdfFilePathSelector = pdfFilePathSelector;
+        _filePathManager = filePathManager;
         _userNotifier = userNotifier;
     }
 
-    public void AddOrUpdateDataFromPdfForm(string? filePath = null)
+    public async Task AddOrUpdateDataFromPdfForm(string? filePath = null)
     {
-        // 1. Get the file path using the selector
-        var selectedPath = _pdfFilePathSelector.GetPdfFilePath(filePath);
+        // 1. Get the file path using FilePathManager
+        string selectedPath;
+        try
+        {
+            selectedPath = _filePathManager.GetFilePath(FilePathManager.FileType.PDF, filePath);
+        }
+        catch (FilePathValidationException ex)
+        {
+            _userNotifier.ShowError($"PDF file path error: {ex.Message}");
+            return;
+        }
 
         // 2. Read existing fields from PDF
-        var fields = _readFromPdfForm.ReadFormFields(selectedPath);
+        var fields = await _readFromPdfForm.ReadFormFieldsAsync(selectedPath);
         if (fields.Count == 0)
         {
             _userNotifier.ShowError("No form fields found or file not found.");
@@ -49,10 +58,10 @@ public class PdfFormController
         var updatedFields = _pdfFormWriteUi.GatherUpdatedFields(fields);
 
         // 4. Write updated fields back to PDF form
-        _writeToPdfForm.WriteFormFields(selectedPath, updatedFields);
+        await _writeToPdfForm.WriteFormFieldsAsync(selectedPath, updatedFields);
 
         // 5. Add updated data to the database
-        _writePdfFormDataToDatabaseService.Write(updatedFields);
+        await _writePdfFormDataToDatabaseService.WriteAsync(updatedFields);
 
         _userNotifier.ShowSuccess("PDF form updated and data imported to SQL table.");
     }

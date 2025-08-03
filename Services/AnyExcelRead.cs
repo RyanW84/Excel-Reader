@@ -1,18 +1,32 @@
 using System.Data;
 using ExcelReader.RyanW84.Helpers;
-using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class AnyExcelRead(IConfiguration configuration, UserNotifier userNotifier)
+public class AnyExcelRead
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly UserNotifier _userNotifier = userNotifier;
+    private readonly FilePathManager _filePathManager;
+    private readonly UserNotifier _userNotifier;
+
+    public AnyExcelRead(FilePathManager filePathManager, UserNotifier userNotifier)
+    {
+        _filePathManager = filePathManager;
+        _userNotifier = userNotifier;
+    }
 
     public async Task<DataTable> ReadFromExcelAsync()
     {
-        const string filePath = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx";
+        string filePath;
+        try
+        {
+            filePath = _filePathManager.GetFilePath(FilePathManager.FileType.Excel);
+        }
+        catch (FilePathValidationException ex)
+        {
+            _userNotifier.ShowError($"Excel file path error: {ex.Message}");
+            return new DataTable();
+        }
 
         return await Task.Run(() =>
         {
@@ -28,7 +42,7 @@ public class AnyExcelRead(IConfiguration configuration, UserNotifier userNotifie
             {
                 var readColumn = dataTable.Columns.Add(worksheet.Cells[1, columns].Text);
                 var typeDetected = false;
-                Console.WriteLine($"column added: {readColumn.ColumnName}");
+                _userNotifier.ShowInfo($"Column added: {readColumn.ColumnName}");
 
                 foreach (var cell in worksheet.Cells[2, columns, worksheet.Dimension.Rows, columns])
                     if (!string.IsNullOrEmpty(cell.Text))

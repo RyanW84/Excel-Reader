@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace ExcelReader.RyanW84.Services; //TODO: resolve errors
+namespace ExcelReader.RyanW84.Services; 
 
 
 /// <summary>
@@ -25,7 +25,7 @@ public class DictionaryToDataTableConverter
 
         foreach (var kvp in dictionary)
         {
-            row[kvp.Key] = kvp.Value != null ? kvp.Value : DBNull.Value;
+            row[kvp.Key] = kvp.Value ?? DBNull.Value;
         }
 
         dataTable.Rows.Add(row);

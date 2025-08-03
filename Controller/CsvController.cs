@@ -1,27 +1,35 @@
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
-using Microsoft.Extensions.Configuration;
+using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class CsvController(IConfiguration configuration, ExcelReaderDbContext dbContext, ReadFromCsv readFromCsv, CreateTableFromCSV createTableFromCSV)
+public class CsvController
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly ExcelReaderDbContext _dbContext = dbContext;
-    private readonly ReadFromCsv _readFromCsv = readFromCsv;
-    private readonly CreateTableFromCSV _createTableFromCSV = createTableFromCSV;
+    private readonly ExcelReaderDbContext _dbContext;
+    private readonly ReadFromCsv _readFromCsv;
+    private readonly CreateTableFromCSV _createTableFromCSV;
+    private readonly UserNotifier _userNotifier;
 
-    public void AddDataFromCsv()
+    public CsvController(ExcelReaderDbContext dbContext, ReadFromCsv readFromCsv, CreateTableFromCSV createTableFromCSV, UserNotifier userNotifier)
     {
-        Console.WriteLine("\nStarting CSV import...");
-        var csvData = _readFromCsv.ReadCsvFile();
-        var dataTable = _readFromCsv.ConvertToDataTable(csvData);
-        Console.WriteLine($"Read {dataTable.Rows.Count} Rows from CSV file.");
-        Console.WriteLine($"Read {dataTable.Columns.Count} Columns from CSV file.");
+        _dbContext = dbContext;
+        _readFromCsv = readFromCsv;
+        _createTableFromCSV = createTableFromCSV;
+        _userNotifier = userNotifier;
+    }
+
+    public async Task AddDataFromCsv()
+    {
+        _userNotifier.ShowInfo("Starting CSV import...");
+        var csvData = await _readFromCsv.ReadCsvFile();
+        var dataTable = await _readFromCsv.ConvertToDataTableAsync(csvData);
+        _userNotifier.ShowInfo($"Read {dataTable.Rows.Count} Rows from CSV file.");
+        _userNotifier.ShowInfo($"Read {dataTable.Columns.Count} Columns from CSV file.");
 
         dataTable.TableName = "CsvImport";
-        _createTableFromCSV.CreateTableFromCsvData(dataTable);
-        _dbContext.SaveChanges();
-        Console.WriteLine("CSV import complete.");
+        await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
+        await _dbContext.SaveChangesAsync();
+        _userNotifier.ShowSuccess("CSV import complete.");
     }
 }

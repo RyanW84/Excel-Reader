@@ -3,9 +3,11 @@ using Spectre.Console;
 
 namespace ExcelReader.RyanW84.UserInterface;
 
-public class ExcelUserInputUi
+public class ExcelUserInputUi(UserNotifier userNotifier)
 {
-    public string GetFilePath(string defaultPath)
+    private readonly UserNotifier _userNotifier = userNotifier;
+
+	public string GetFilePath(string defaultPath)
     {
         return AnsiConsole.Ask<string>(
             "\nEnter the path to the Excel file (or press Enter for default):",
@@ -52,15 +54,17 @@ public class ExcelUserInputUi
         ageFieldName ??= existingFields.Keys.FirstOrDefault(k =>
             k.Equals("age", StringComparison.OrdinalIgnoreCase)
         );
-        if (ageFieldName != null)
+        
+        if (!string.IsNullOrEmpty(ageFieldName) && dobValue != null)
         {
-            var age = ExcelFieldValidator.CalculateAge(dobValue);
-            if (age != null)
+            int? calculatedAge = FieldValidator.CalculateAge(dobValue);
+            if (calculatedAge.HasValue)
             {
-                fieldValues[ageFieldName] = age.ToString();
-                AnsiConsole.MarkupLine($"[green]Calculated age from DOB: {age}[/]");
+                fieldValues[ageFieldName] = calculatedAge.Value.ToString();
+                _userNotifier.ShowSuccess($"Calculated age from DOB: {calculatedAge}");
             }
         }
+        
         return fieldValues;
     }
 
@@ -83,7 +87,7 @@ public class ExcelUserInputUi
             new TextPrompt<string>("Enter Date of Birth (dd-MM-yyyy):")
                 .DefaultValue(currentValue)
                 .Validate(date =>
-                    ExcelFieldValidator.IsValidDate(date)
+                    FieldValidator.IsValidDate(date)
                         ? ValidationResult.Success()
                         : ValidationResult.Error("Invalid date format. Use dd-MM-yyyy.")
                 )
@@ -103,7 +107,7 @@ public class ExcelUserInputUi
 
     private string HandleAgeField(ref string? ageFieldName, string fieldName, string currentValue)
     {
-        AnsiConsole.MarkupLine("Age is autocalculated");
+        _userNotifier.ShowInfo("Age is autocalculated");
         ageFieldName = fieldName;
         return currentValue;
     }
@@ -117,27 +121,27 @@ public class ExcelUserInputUi
 
     public void DisplayMessage(string message)
     {
-        AnsiConsole.MarkupLine(message);
+        _userNotifier.ShowInfo(message);
     }
 
     public void DisplayError(string message)
     {
-        AnsiConsole.MarkupLine($"[red]{message}[/]");
+        _userNotifier.ShowError(message);
     }
 
     public void DisplaySuccess(string message)
     {
-        AnsiConsole.MarkupLine($"[green]{message}[/]");
+        _userNotifier.ShowSuccess(message);
     }
 
     public void DisplayWarning(string message)
     {
-        AnsiConsole.MarkupLine($"[yellow]{message}[/]");
+        _userNotifier.ShowWarning(message);
     }
 
     public void DisplayErrorMessage()
     {
-        AnsiConsole.MarkupLine("[red]An error occurred while processing the Excel file.[/]");
+        _userNotifier.ShowError("An error occurred while processing the Excel file.");
     }
 }
 // This class provides a user interface for interacting with Excel files, allowing users to input file paths and update field values interactively.
