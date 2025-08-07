@@ -8,28 +8,29 @@ using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class PdfTableController(    
-    IExcelReaderDbContext dbContext,  // ← Change this
-    IPdfTableReader readFromPdf,
-    ICsvTableCreator createTableFromCSV,
-    INotificationService notificationService)
+public class PdfTableController(
+	IExcelReaderDbContext dbContext ,
+	IPdfTableReader readFromPdf ,
+	ICsvTableCreator createTableFromCSV ,
+	INotificationService notificationService) : DataImportControllerBase(dbContext, notificationService)
 {
-    private readonly IExcelReaderDbContext _dbContext = dbContext;
-    private readonly IPdfTableReader _readFromPdf = readFromPdf;
-    private readonly ICsvTableCreator _createTableFromCSV = createTableFromCSV;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IPdfTableReader _readFromPdf = readFromPdf ?? throw new ArgumentNullException(nameof(readFromPdf));
+    private readonly ICsvTableCreator _createTableFromCSV = createTableFromCSV ?? throw new ArgumentNullException(nameof(createTableFromCSV));
 
-    public async Task AddDataFromPdf()
+	public async Task AddDataFromPdf()
     {
-        _notificationService.ShowInfo("Starting PDF import...");
-        var pdfData = await _readFromPdf.ReadPdfFileAsync();
-        var dataTable = await _readFromPdf.ConvertToDataTableAsync(pdfData);
-        _notificationService.ShowInfo($"Read {dataTable.Rows.Count} Rows from PDF file.");
-        _notificationService.ShowInfo($"Read {dataTable.Columns.Count} Columns from PDF file.");
+        await ExecuteOperationAsync(async () =>
+        {
+            NotificationService.ShowInfo("Starting PDF import...");
+            var pdfData = await _readFromPdf.ReadPdfFileAsync();
+            var dataTable = await _readFromPdf.ConvertToDataTableAsync(pdfData);
+            NotificationService.ShowInfo($"Read {dataTable.Rows.Count} Rows from PDF file.");
+            NotificationService.ShowInfo($"Read {dataTable.Columns.Count} Columns from PDF file.");
 
-        dataTable.TableName = "PdfImport";
-        await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
-        await _dbContext.SaveChangesAsync();
-        _notificationService.ShowSuccess("PDF import complete.");
+            dataTable.TableName = "PdfImport";
+            await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
+            await SaveChangesAsync();
+            NotificationService.ShowSuccess("PDF import complete.");
+        }, "PDF import");
     }
 }

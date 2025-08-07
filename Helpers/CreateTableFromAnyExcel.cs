@@ -1,55 +1,35 @@
 using System.Data;
-
 using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
-
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Helpers;
 
-public class CreateTableFromAnyExcel : IExcelTableCreator
+public class CreateTableFromAnyExcel(IConfiguration configuration) : IExcelTableCreator
 {
-    private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-    public CreateTableFromAnyExcel(IConfiguration configuration)
+	public void CreateTableFromExcel(DataTable dataTable)
     {
-        _configuration = configuration;
-    }
+        ArgumentNullException.ThrowIfNull(dataTable);
 
-    public void CreateTableFromExcel(DataTable dataTable)
-    {
-        var tableName = $"{dataTable.TableName}";
-        var connectionString = _configuration.GetConnectionString("DefaultConnection");
-        using (var connection = new SqlConnection(connectionString))
-        {
-            connection.Open();
-            var sqlScript = $"CREATE TABLE [{tableName}] (\n";
-            foreach (DataColumn column in dataTable.Columns)
-            {
-                var sqlDataType = GetSqlDataType(column.DataType);
-                sqlScript += $"[{column.ColumnName}] {sqlDataType},\n";
-            }
+        var connectionString =
+            _configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("DefaultConnection string not found");
 
-            sqlScript = sqlScript.Remove(sqlScript.Length - 2);
-            sqlScript += ")";
-            using var command = new SqlCommand(sqlScript , connection);
-            command.ExecuteNonQuery();
-            using var bulkCopy = new SqlBulkCopy(connection);
-            bulkCopy.DestinationTableName = tableName;
-            bulkCopy.WriteToServer(dataTable);
-        }
-    }
+        using var connection = new SqlConnection(connectionString);
+        connection.Open();
 
-    private static string GetSqlDataType(Type type)
-    {
-        return type.Name switch
-        {
-            "String" => "nvarchar(max)",
-            "Int32" => "int",
-            "DateTime" => "datetime",
-            "Double" => "float",
-            "Boolean" => "bit",
-            _ => "nvarchar(max)",
-        };
+        var createTableSql = SqlDataTypeMapper.BuildCreateTableStatement(
+            dataTable.TableName,
+            dataTable.Columns
+        );
+
+        using var command = new SqlCommand(createTableSql, connection);
+        command.ExecuteNonQuery();
+
+        using var bulkCopy = new SqlBulkCopy(connection);
+        bulkCopy.DestinationTableName = SqlDataTypeMapper.SanitizeTableName(dataTable.TableName);
+        bulkCopy.WriteToServer(dataTable);
     }
 }

@@ -1,5 +1,4 @@
-# File Reader (AKA Excel Reader)
-
+# File Reader (Excel Reader)
 A comprehensive .NET 9 console application for reading and writing various file formats including Excel, CSV, and PDF files. The application provides a user-friendly console interface for importing data from different file types and managing database operations.
 
 ## Requirements
@@ -115,12 +114,43 @@ The application will present an interactive menu with the following options:
 - **PDF: Form Import** - Read PDF form fields
 - **PDF: Form Write** - Write data to PDF forms
 
-## Configuration
+### Sample Data Files
 
-The application uses `appsettings.json` for configuration:
+Ensure you have sample files in the `Data/` folder:
+- **ExcelBeginner.xlsx** - Sample Excel file for basic import
+- **ExcelDynamic.xlsx** - Sample Excel file for dynamic operations
+- **ExcelCSV.csv** - Sample CSV file for import testing
+- **FillablePDF.pdf** - Sample PDF form for testing
+- **TablePDF.pdf** - Sample PDF with tabular data
 
-- **ConnectionStrings.DefaultConnection** - Database connection string
-- **Logging** - Logging level configuration
+## 📋 Usage Guide
+
+### Interactive Menu Options
+
+When you run the application, you'll see an interactive menu:
+
+1. **Excel: Beginner Import** - Import data from a predefined Excel structure
+2. **Excel: Dynamic Import** - Import Excel files with dynamic table creation
+3. **Excel: Write** - Update existing Excel files with database data
+4. **CSV: Import** - Import CSV files with automatic schema detection
+5. **PDF: Import** - Extract data from PDF tables
+6. **PDF: Form Import** - Read data from PDF forms
+7. **PDF: Form Write** - Write data to fillable PDF forms
+
+### Example Workflow
+
+1. **Start the application** - Database is automatically created/recreated
+2. **Choose an import option** - Select your preferred file format
+3. **Follow prompts** - Provide file paths or use defaults
+4. **Review results** - View imported data and any processing messages
+5. **Database operations** - Data is automatically saved to the database
+
+## ⚙️ Configuration
+
+### Database Configuration (`appsettings.json`)
+
+- **ConnectionStrings.DefaultConnection** - Set your database connection string here
+- **Logging** - Adjust logging levels as per your debugging needs
 
 ## Project Structure
 ├── Abstractions/        # Interface definitions<br>
@@ -133,9 +163,36 @@ The application uses `appsettings.json` for configuration:
 ├── UserInterface/       # Console UI components<br>
 └── Program.cs           # Application entry point<br>
 
-## License
+## 🧪 Key Design Features
 
-EPPlus Non-Commercial License - This project uses EPPlus under the non-commercial license for personal use.
+### Error Handling
+- **Centralized Error Handling** in base controllers
+- **User-friendly Messages** with detailed logging
+- **Graceful Degradation** when operations fail
+
+### Performance Optimizations
+- **Async/Await** throughout the application
+- **Bulk Database Operations** for large datasets
+- **Memory-efficient** file processing
+- **Connection Pooling** for database operations
+
+### Code Quality
+- **SOLID Principles** adherence
+- **Dependency Injection** for testability
+- **Interface Segregation** for focused contracts
+- **Single Responsibility** for each component
+
+## 📄 License & Legal
+
+### EPPlus License
+This project uses EPPlus under the **Polyform Noncommercial License**:
+- ✅ **Personal Use** - Free for personal, educational, and evaluation purposes
+- ❌ **Commercial Use** - Requires commercial license from EPPlus Software
+- 📖 [EPPlus License Details](https://epplussoftware.com/en/Home/LicenseDetails)
+
+### iText7 License
+- Uses iText7 under **AGPL License** for non-commercial use
+- Commercial use requires appropriate licensing
 
 ## Author
 
@@ -156,6 +213,10 @@ This project was built with the help of the following resources and tutorials:
 - [Stack Overflow - Import CSV or XLSX into DataTable using EPPlus](https://stackoverflow.com/questions/51633830/import-a-csv-or-xlsx-into-a-datatable-using-epplus#:~:text=For%20work%20with%20csv%2C%20you,and%20xlsm%20and%20write%20xlsx.)
 - [How to Create a Fillable PDF in LibreOffice](https://www.wps.com/blog/how-to-create-a-fillable-pdf-in-libreoffice-a-step-by-step-guide/)
 - [Stack Overflow - Is there a way to edit a PDF with C#?](https://stackoverflow.com/questions/2923546/is-there-a-way-to-edit-a-pdf-with-c)
+
+---
+
+⭐ **If this project helped you learn something new, please give it a star!** ⭐
 
 
 

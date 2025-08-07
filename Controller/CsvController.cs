@@ -4,7 +4,6 @@ using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
 using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
 using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
 using ExcelReader.RyanW84.Abstractions.Services;
-using ExcelReader.RyanW84.Data;
 
 namespace ExcelReader.RyanW84.Controller;
 
@@ -14,26 +13,27 @@ public class CsvController(
 	ICsvTableCreator createTableFromCSV ,
 	INotificationService notificationService ,
 	IDataConverter<List<string[]> , DataTable> csvDataConverter
-	)
+	) : DataImportControllerBase(dbContext, notificationService)
 {
-    private readonly IExcelReaderDbContext _dbContext = dbContext;
-    private readonly ICsvFileReader _csvFileReader = csvFileReader;
-    private readonly ICsvTableCreator _createTableFromCSV = createTableFromCSV;
-    private readonly INotificationService _notificationService = notificationService;
-    private readonly IDataConverter<List<string[]>, DataTable> _csvDataConverter = csvDataConverter;
+    private readonly ICsvFileReader _csvFileReader = csvFileReader ?? throw new ArgumentNullException(nameof(csvFileReader));
+    private readonly ICsvTableCreator _createTableFromCSV =
+			createTableFromCSV ?? throw new ArgumentNullException(nameof(createTableFromCSV));
+    private readonly IDataConverter<List<string[]>, DataTable> _csvDataConverter =
+			csvDataConverter ?? throw new ArgumentNullException(nameof(csvDataConverter));
 
 	public async Task AddDataFromCsv()
     {
-        _notificationService.ShowInfo("Starting CSV import...");
-        var csvData = await _csvFileReader.ReadCsvFile();
-        var dataTable = await _csvDataConverter.ConvertAsync(csvData);
-        _notificationService.ShowInfo($"Read {dataTable.Rows.Count} Rows from CSV file.");
-        _notificationService.ShowInfo($"Read {dataTable.Columns.Count} Columns from CSV file.");
-
-        dataTable.TableName = "CsvImport";
-        await _createTableFromCSV.CreateTableFromCsvDataAsync(dataTable);
-        await _dbContext.SaveChangesAsync();
-        _notificationService.ShowSuccess("CSV import complete.");
+        await ExecuteTableImportAsync(
+            _csvFileReader,
+            _createTableFromCSV,
+            "CSV",
+            async reader =>
+            {
+                var csvData = await reader.ReadCsvFile();
+                return await _csvDataConverter.ConvertAsync(csvData);
+            },
+            (creator, dataTable) => creator.CreateTableFromCsvDataAsync(dataTable),
+            "CsvImport"
+        );
     }
 }
-// Note: The above code assumes that the ICsvFileReader and ICsvTableCreator interfaces

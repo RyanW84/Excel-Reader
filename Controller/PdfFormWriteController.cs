@@ -1,16 +1,13 @@
 using System.Data;
 using System.Data.SqlClient;
-using ExcelReader.RyanW84.Data;
-using ExcelReader.RyanW84.Services;
-using ExcelReader.RyanW84.UserInterface;
-using Microsoft.Extensions.Configuration;
-using ExcelReader.RyanW84.Helpers;
-using ExcelReader.RyanW84.Abstractions.Services;
+using ExcelReader.RyanW84.Abstractions.Common;
+using ExcelReader.RyanW84.Abstractions.Core;
+using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
 using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
 using ExcelReader.RyanW84.Abstractions.FileOperations.Writers;
-using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
-using ExcelReader.RyanW84.Abstractions.Core;
-using ExcelReader.RyanW84.Abstractions.Common;
+using ExcelReader.RyanW84.Abstractions.Services;
+using ExcelReader.RyanW84.Helpers;
+using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Controller;
 
@@ -42,12 +39,13 @@ public class PdfFormWriteController(
     {
         try
         {
-			// 1. Get file path from user via FilePathManager
-			var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
-			var filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
+            // 1. Get file path from user via FilePathManager
+            var customDefault =
+                @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
+            var filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
 
-			// 2. Get existing field values from PDF
-			var existingFields = GetExistingFieldValues(filePath);
+            // 2. Get existing field values from PDF
+            var existingFields = GetExistingFieldValues(filePath);
             if (existingFields.Count == 0)
             {
                 _userNotifier.ShowError("No form fields found or file not found.");
@@ -79,42 +77,9 @@ public class PdfFormWriteController(
         }
         catch (IOException ex)
         {
-            _userNotifier.ShowError($"File I/O error: {ex.Message}. The PDF file may be in use by another application.");
-        }
-        catch (Exception ex)
-        {
-            _userNotifier.ShowError($"An unexpected error occurred: {ex.Message}");
-        }
-    }
-
-    // Keep synchronous version for backward compatibility
-    public void UpdatePdfFormAndDatabase(string filePath)
-    {
-        try
-        {
-            // Legacy method that accepts file path parameter
-            // 1. Get existing field values from PDF
-            var existingFields = GetExistingFieldValues(filePath);
-            if (existingFields.Count == 0)
-            {
-                _userNotifier.ShowError("No form fields found or file not found.");
-                return;
-            }
-
-            // 2. Get updated field values from user interaction
-            var updatedFields = GetUpdatedFieldValues(existingFields);
-
-            // 3. Write updated fields to PDF form
-            WriteDataToPdfFormAsync(filePath, updatedFields).GetAwaiter().GetResult();
-
-            // 4. Write updated fields to database
-            WriteDataToDatabaseAsync(updatedFields).GetAwaiter().GetResult();
-
-            _userNotifier.ShowSuccess("PDF form and database updated successfully!");
-        }
-        catch (FilePathValidationException ex)
-        {
-            _userNotifier.ShowError($"File path error: {ex.Message}");
+            _userNotifier.ShowError(
+                $"File I/O error: {ex.Message}. The PDF file may be in use by another application."
+            );
         }
         catch (Exception ex)
         {
@@ -138,7 +103,10 @@ public class PdfFormWriteController(
         return _fieldInputUi.GatherUpdatedFields(fieldValues, FileType.PDF);
     }
 
-    public async Task WriteDataToPdfFormAsync(string filePath, Dictionary<string, string> fieldValues)
+    public async Task WriteDataToPdfFormAsync(
+        string filePath,
+        Dictionary<string, string> fieldValues
+    )
     {
         await _writeToPdfForm.WriteFormFieldsAsync(filePath, fieldValues);
         await _dbContext.SaveChangesAsync();
@@ -147,26 +115,5 @@ public class PdfFormWriteController(
     public async Task WriteDataToDatabaseAsync(Dictionary<string, string> fieldValues)
     {
         await _writePdfFormDataToDatabaseService.WriteAsync(fieldValues);
-    }
-
-    // Legacy synchronous methods for backward compatibility
-    public void WriteDataToPdfForm(string filePath, Dictionary<string, string> fieldValues)
-    {
-        WriteDataToPdfFormAsync(filePath, fieldValues).GetAwaiter().GetResult();
-    }
-
-    public void WriteDataToDatabase(Dictionary<string, string> fieldValues)
-    {
-        WriteDataToDatabaseAsync(fieldValues).GetAwaiter().GetResult();
-    }
-
-    public void EnsureTableExists(DataTable dataTable, SqlConnection connection)
-    {
-        _tableExistenceService.EnsureTableExists(dataTable, connection);
-    }
-
-    public void EnsureTableExists(DataTable dataTable)
-    {
-        _tableExistenceService.EnsureTableExists(dataTable);
     }
 }

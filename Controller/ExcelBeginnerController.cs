@@ -1,83 +1,39 @@
 using System.Data;
-
 using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
 using ExcelReader.RyanW84.Abstractions.Services;
-using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Models;
+using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Controller;
 
 public class ExcelBeginnerController(
 	IExcelBeginnerService excelBeginnerService ,
 	IExcelReaderDbContext dbContext ,
-	INotificationService userNotifier
-	)
+	INotificationService notificationService) : DataImportControllerBase(dbContext, notificationService)
 {
-    private readonly IExcelBeginnerService _excelBeginnerService = excelBeginnerService;
-    private readonly IExcelReaderDbContext _dbContext = dbContext;
-    private readonly INotificationService _userNotifier = userNotifier;
+    private readonly IExcelBeginnerService _excelBeginnerService = excelBeginnerService ?? throw new ArgumentNullException(nameof(excelBeginnerService));
 
-	// Orchestrator method for all steps
 	public async Task AddDataFromExcel()
     {
-        // 1. Read data from Excel file
-        var dataTable = _excelBeginnerService.ReadFromExcel();
-        if (dataTable == null || dataTable.Rows.Count == 0)
-        {
-            _userNotifier.ShowError("No data found in the Excel file.");
-            return;
-        }
-
-        // 2. Convert DataTable to domain models
-        var excelBeginners = ConvertDataTableToModels(dataTable);
-        if (excelBeginners.Count == 0)
-        {
-            _userNotifier.ShowError("No valid data rows found to import.");
-            return;
-        }
-
-        // 3. Save to database
-        _dbContext.ExcelBeginner.AddRange(excelBeginners);
-        await _dbContext.SaveChangesAsync();
-
-        _userNotifier.ShowSuccess(
-            $"ExcelBeginner import complete. Imported {excelBeginners.Count} records."
+        await ExecuteDomainImportAsync(
+            _excelBeginnerService,
+            "Excel",
+            service => service.ReadFromExcel(),
+            ConvertDataTableToModels,
+            async (dbContext, models) => dbContext.ExcelBeginner.AddRange(models)
         );
     }
 
-    private List<ExcelBeginner> ConvertDataTableToModels(DataTable dataTable)
-    {
-        var excelBeginners = new List<ExcelBeginner>();
-
-        foreach (DataRow row in dataTable.Rows)
-        {
-            var excelBeginner = new ExcelBeginner
+    private List<ExcelBeginner> ConvertDataTableToModels(DataTable dataTable) =>
+		[.. dataTable.Rows
+            .Cast<DataRow>()
+            .Select(row => new ExcelBeginner
             {
-                Name = GetStringValue(row, "Name"),
-                Age = GetIntValue(row, "age"),
-                Sex = GetStringValue(row, "sex"),
-                Colour = GetStringValue(row, "colour"),
-                Height = GetStringValue(row, "height"),
-            };
-
-            // Skip rows with empty required fields
-            if (string.IsNullOrWhiteSpace(excelBeginner.Name))
-                continue;
-
-            excelBeginners.Add(excelBeginner);
-        }
-
-        return excelBeginners;
-    }
-
-    private static string GetStringValue(DataRow row, string columnName)
-    {
-        return row[columnName]?.ToString()?.Trim() ?? string.Empty;
-    }
-
-    private static int GetIntValue(DataRow row, string columnName)
-    {
-        var value = row[columnName]?.ToString()?.Trim();
-        return int.TryParse(value, out var result) ? result : 0;
-    }
+                Name = row.GetStringValue("Name"),
+                Age = row.GetIntValue("age"),
+                Sex = row.GetStringValue("sex"),
+                Colour = row.GetStringValue("colour"),
+                Height = row.GetStringValue("height"),
+            })
+            .Where(model => !string.IsNullOrWhiteSpace(model.Name))];
 }
