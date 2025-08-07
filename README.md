@@ -1,4 +1,4 @@
-﻿# File Reader (AKA Excel Reader)
+no﻿# File Reader (AKA Excel Reader)
 
 A comprehensive .NET 9 console application for reading and writing various file formats including Excel, CSV, and PDF files. The application provides a user-friendly console interface for importing data from different file types and managing database operations.
 
@@ -123,15 +123,15 @@ The application uses `appsettings.json` for configuration:
 - **Logging** - Logging level configuration
 
 ## Project Structure
-├── Abstractions/          # Interface definitions. 
-├── Controller/            # Business logic controllers. 
-├── Data/                 # Database context and models. 
-├── Helpers/              # Utility classes. 
-├── Models/               # Data models. 
-├── Repositories/         # Data access layer. 
-├── Services/            # Business services. 
-├── UserInterface/       # Console UI components. 
-└── Program.cs           # Application entry point. 
+├── Abstractions/        # Interface definitions<br>
+├── Controller/          # Business logic controllers<br>
+├── Data/                # Database context and models<br>
+├── Helpers/             # Utility classes<br>
+├── Models/              # Data models<br>
+├── Repositories/        # Data access layer<br>
+├── Services/            # Business services<br>
+├── UserInterface/       # Console UI components<br>
+└── Program.cs           # Application entry point<br>
 
 ## License
 
