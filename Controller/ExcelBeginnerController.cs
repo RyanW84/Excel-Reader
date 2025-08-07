@@ -1,21 +1,21 @@
 using System.Data;
-using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Services;
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Models;
-using ExcelReader.RyanW84.Services;
 
 namespace ExcelReader.RyanW84.Controller;
 
 public class ExcelBeginnerController
 {
     private readonly IExcelBeginnerService _excelBeginnerService;
-    private readonly ExcelReaderDbContext _dbContext;
+    private readonly IExcelReaderDbContext _dbContext;
     private readonly INotificationService _userNotifier;
 
     public ExcelBeginnerController(
         IExcelBeginnerService excelBeginnerService,
-        ExcelReaderDbContext dbContext,
-        INotificationService userNotifier)
+        IExcelReaderDbContext dbContext,
+        INotificationService userNotifier
+    )
     {
         _excelBeginnerService = excelBeginnerService;
         _dbContext = dbContext;

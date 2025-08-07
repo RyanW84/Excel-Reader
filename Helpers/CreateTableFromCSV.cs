@@ -1,12 +1,14 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-
-using System.Data;
+﻿using System.Data;
 using System.Text;
+
+using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
+
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Helpers;
 
-public class CreateTableFromCSV
+public class CreateTableFromCSV : ICsvTableCreator
 {
     private readonly IConfiguration _configuration;
 
@@ -30,7 +32,10 @@ public class CreateTableFromCSV
             throw new ArgumentException("Table name cannot be empty", nameof(dataTable));
 
         if (dataTable.Columns.Count == 0)
-            throw new ArgumentException("DataTable must have at least one column", nameof(dataTable));
+            throw new ArgumentException(
+                "DataTable must have at least one column",
+                nameof(dataTable)
+            );
 
         // Validate column names and sanitize if needed
         for (int i = 0; i < dataTable.Columns.Count; i++)
@@ -94,14 +99,30 @@ public class CreateTableFromCSV
             "double" => "FLOAT",
             "datetime" => "DATETIME2",
             "boolean" => "BIT",
-            _ => "NVARCHAR(MAX)"
+            _ => "NVARCHAR(MAX)",
         };
     }
 
     private string SanitizeColumnName(string columnName)
     {
         // Remove or replace invalid characters
-        var invalidChars = new[] { ' ', '\n', '\r', '\t', ',', '.', '/', '\\', '[', ']', '(', ')', '{', '}' };
+        var invalidChars = new[]
+        {
+            ' ',
+            '\n',
+            '\r',
+            '\t',
+            ',',
+            '.',
+            '/',
+            '\\',
+            '[',
+            ']',
+            '(',
+            ')',
+            '{',
+            '}',
+        };
         var sanitized = invalidChars.Aggregate(columnName, (current, c) => current.Replace(c, '_'));
 
         // Ensure the name starts with a letter
@@ -114,7 +135,23 @@ public class CreateTableFromCSV
     private string SanitizeTableName(string tableName)
     {
         // Similar to column name sanitization but possibly with different rules
-        var invalidChars = new[] { ' ', '\n', '\r', '\t', ',', '.', '/', '\\', '[', ']', '(', ')', '{', '}' };
+        var invalidChars = new[]
+        {
+            ' ',
+            '\n',
+            '\r',
+            '\t',
+            ',',
+            '.',
+            '/',
+            '\\',
+            '[',
+            ']',
+            '(',
+            ')',
+            '{',
+            '}',
+        };
         var sanitized = invalidChars.Aggregate(tableName, (current, c) => current.Replace(c, '_'));
 
         if (!char.IsLetter(sanitized[0]))

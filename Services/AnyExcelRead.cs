@@ -1,7 +1,9 @@
 using System.Data;
 using ExcelReader.RyanW84.Helpers;
 using OfficeOpenXml;
-using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Services;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
+using ExcelReader.RyanW84.Abstractions.Common;
 
 namespace ExcelReader.RyanW84.Services;
 
@@ -15,7 +17,7 @@ public class AnyExcelRead(IFilePathService filePathManager , INotificationServic
         string filePath;
         try
 		{
-			var customDefault = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\ExcelDynamic.Xlsx";
+			var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.Xlsx";
 			filePath = _filePathManager.GetFilePath(FileType.Excel, customDefault);
         }
         catch (FilePathValidationException ex)

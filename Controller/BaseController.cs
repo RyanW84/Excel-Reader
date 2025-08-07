@@ -1,4 +1,4 @@
-using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Services;
 
 namespace ExcelReader.RyanW84.Controller;
 
@@ -7,15 +7,16 @@ namespace ExcelReader.RyanW84.Controller;
 /// </summary>
 public abstract class BaseController(INotificationService notificationService)
 {
-    protected readonly INotificationService NotificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+    protected readonly INotificationService NotificationService =
+        notificationService ?? throw new ArgumentNullException(nameof(notificationService));
 
-	/// <summary>
-	/// Template method pattern for handling operations with consistent error handling
-	/// </summary>
-	/// <param name="operation">The operation to execute</param>
-	/// <param name="operationName">Name of the operation for error reporting</param>
-	/// <returns>True if operation succeeded, false otherwise</returns>
-	protected async Task<bool> ExecuteOperationAsync(Func<Task> operation, string operationName)
+    /// <summary>
+    /// Template method pattern for handling operations with consistent error handling
+    /// </summary>
+    /// <param name="operation">The operation to execute</param>
+    /// <param name="operationName">Name of the operation for error reporting</param>
+    /// <returns>True if operation succeeded, false otherwise</returns>
+    protected async Task<bool> ExecuteOperationAsync(Func<Task> operation, string operationName)
     {
         try
         {
@@ -37,7 +38,11 @@ public abstract class BaseController(INotificationService notificationService)
     /// <param name="operationName">Name of the operation for error reporting</param>
     /// <param name="defaultValue">Default value to return on error</param>
     /// <returns>Operation result or default value on error</returns>
-    protected async Task<T> ExecuteOperationAsync<T>(Func<Task<T>> operation, string operationName, T defaultValue = default!)
+    protected async Task<T> ExecuteOperationAsync<T>(
+        Func<Task<T>> operation,
+        string operationName,
+        T defaultValue = default!
+    )
     {
         try
         {
@@ -71,6 +76,9 @@ public abstract class BaseController(INotificationService notificationService)
     protected static void ValidateNotNullOrEmpty(string? value, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"Parameter {parameterName} cannot be null or empty.", parameterName);
+            throw new ArgumentException(
+                $"Parameter {parameterName} cannot be null or empty.",
+                parameterName
+            );
     }
 }

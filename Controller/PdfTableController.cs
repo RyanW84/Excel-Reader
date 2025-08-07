@@ -1,19 +1,21 @@
-using ExcelReader.RyanW84.Data;
+﻿using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.Helpers;
-using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Services;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
+using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class PdfTableController(
-    ExcelReaderDbContext dbContext,
+public class PdfTableController(    
+    IExcelReaderDbContext dbContext,  // ← Change this
     IPdfTableReader readFromPdf,
-    CreateTableFromCSV createTableFromCSV,
+    ICsvTableCreator createTableFromCSV,
     INotificationService notificationService)
 {
-    private readonly ExcelReaderDbContext _dbContext = dbContext;
+    private readonly IExcelReaderDbContext _dbContext = dbContext;
     private readonly IPdfTableReader _readFromPdf = readFromPdf;
-    private readonly CreateTableFromCSV _createTableFromCSV = createTableFromCSV;
+    private readonly ICsvTableCreator _createTableFromCSV = createTableFromCSV;
     private readonly INotificationService _notificationService = notificationService;
 
     public async Task AddDataFromPdf()

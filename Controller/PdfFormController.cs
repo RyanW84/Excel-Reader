@@ -1,29 +1,32 @@
 // Ignore Spelling: Pdf
 
-using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Common;
+using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Writers;
+using ExcelReader.RyanW84.Abstractions.Services;
 using ExcelReader.RyanW84.Helpers;
-using ExcelReader.RyanW84.Services;
-using ExcelReader.RyanW84.UserInterface;
 
 namespace ExcelReader.RyanW84.Controller;
 
 public class PdfFormController(
-	ReadFromPdfForm readFromPdfForm ,
-	WriteToPdfForm writeToPdfForm ,
-	WritePdfFormDataToDatabaseService writePdfFormDataToDatabaseService ,
-	FieldInputUi fieldInputUi ,
-	IFilePathService filePathManager ,
-	INotificationService notificationService
-	)
+    IPdfFormReader readFromPdfForm,
+    IPdfFormWriter writeToPdfForm,
+    IPdfFormDatabaseService writePdfFormDataToDatabaseService,
+    IFieldInputService fieldInputUi,
+    IFilePathService filePathManager,
+    INotificationService notificationService
+)
 {
-    private readonly ReadFromPdfForm _readFromPdfForm = readFromPdfForm;
-    private readonly WriteToPdfForm _writeToPdfForm = writeToPdfForm;
-    private readonly WritePdfFormDataToDatabaseService _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService;
-    private readonly FieldInputUi _fieldInputUi = fieldInputUi;
+    private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm;
+    private readonly IPdfFormWriter _writeToPdfForm = writeToPdfForm;
+    private readonly IPdfFormDatabaseService _writePdfFormDataToDatabaseService =
+        writePdfFormDataToDatabaseService;
+    private readonly IFieldInputService _fieldInputUi = fieldInputUi;
     private readonly IFilePathService _filePathManager = filePathManager;
     private readonly INotificationService _notificationService = notificationService;
 
-	public async Task AddOrUpdateDataFromPdfForm()
+    public async Task AddOrUpdateDataFromPdfForm()
     {
         // 1. Get the file path using FilePathManager
 
@@ -31,7 +34,7 @@ public class PdfFormController(
         try
         {
             var customDefault =
-                @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\FillablePDF.pdf";
+                @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
             filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
         }
         catch (FilePathValidationException ex)
@@ -50,10 +53,7 @@ public class PdfFormController(
 
         // 3. Pass fields to unified UI for user to update
         // Async usage:
-        var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(
-            fields,
-            FileType.PDF
-        );
+        var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(fields, FileType.PDF);
 
         // Or backward compatible:
         // var updatedFields = _fieldInputUi.GatherUpdatedFields(fields, FieldInputUi.FileType.PDF);

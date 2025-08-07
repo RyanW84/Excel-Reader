@@ -1,17 +1,13 @@
 // Ignore Spelling: pdf
 
 using ExcelReader.RyanW84.Controller;
-using ExcelReader.RyanW84.Services;
-using ExcelReader.RyanW84.Abstractions;
 using Spectre.Console;
 
 namespace ExcelReader.RyanW84.UserInterface;
 
 public class MainMenuUI(
     ExcelWriteController excelWriteController,
-    IAnyExcelReader anyExcelRead,
     PdfFormWriteController pdfFormWriteController,
-    IPdfFormReader readFromPdfForm,
     CsvController csvController,
     AnyExcelReadController anyExcelReadController,
     ExcelBeginnerController excelBeginnerController,
@@ -20,9 +16,7 @@ public class MainMenuUI(
 )
 {
     private readonly ExcelWriteController _excelWriteController = excelWriteController;
-    private readonly IAnyExcelReader _anyExcelRead = anyExcelRead;
     private readonly PdfFormWriteController _pdfFormWriteController = pdfFormWriteController;
-    private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm;
     private readonly CsvController _csvController = csvController;
     private readonly AnyExcelReadController _anyExcelReadController = anyExcelReadController;
     private readonly ExcelBeginnerController _excelBeginnerController = excelBeginnerController;
@@ -37,7 +31,8 @@ public class MainMenuUI(
 
         while (!exit)
         {
-            AnsiConsole.Write(new Rule("[yellow]FileRead[/]").RuleStyle("yellow").Centered());
+            ShowHeader();
+
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[bold yellow]Select an operation:[/]")
@@ -55,43 +50,65 @@ public class MainMenuUI(
                     )
             );
 
-            switch (choice)
+            if (choice == "Exit")
             {
-                case "Excel: Beginner Import":
-                    await _excelBeginnerController.AddDataFromExcel();
-                    break;
-                case "Excel: Dynamic Import":
-                    await _anyExcelReadController.AddDynamicDataFromExcel();
-                    break;
-                case "Excel: Write":
-                    await _excelWriteController.UpdateExcelAndDatabaseAsync();
-                    break;
-                case "CSV: Import":
-                    await _csvController.AddDataFromCsv();
-                    break;
-                case "PDF: Import":
-                    await _pdfController.AddDataFromPdf();
-                    break;
-                case "PDF: Form Import":
-                    await _pdfFormController.AddOrUpdateDataFromPdfForm();
-                    break;
-                case "PDF: Form Write":
-                    await _pdfFormWriteController.UpdatePdfFormAndDatabaseAsync();
-                    break;
-                case "Exit":
-                    exit = true;
-                    break;
+                exit = true;
+                continue;
             }
+
+            // Show operation header
+            Console.Clear();
+            ShowHeader();
+
+            AnsiConsole.MarkupLine($"[bold cyan]Running: {choice}[/]");
+
+            try
+            {
+                // Execute the selected operation
+                await ExecuteOperation(choice);
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]An error occurred: {ex.Message}[/]");
+            }
+
+            // Wait for user input before returning to menu
+            AnsiConsole.MarkupLine("[dim]Press any key to return to the main menu...[/]");
+            Console.ReadKey(true);
         }
     }
 
-    private string PromptForFilePath(string currentPath, string fileType)
+    private void ShowHeader()
     {
-        var useExisting = AnsiConsole.Confirm(
-            $"Use existing {fileType} path? [green]{currentPath}[/]"
-        );
-        return useExisting
-            ? currentPath
-            : AnsiConsole.Ask($"Enter the path to the {fileType}:", currentPath);
+        Console.Clear();
+        AnsiConsole.Write(new Rule("[yellow]File Reader[/]").RuleStyle("yellow").Centered());
+    }
+
+    private async Task ExecuteOperation(string choice)
+    {
+        switch (choice)
+        {
+            case "Excel: Beginner Import":
+                await _excelBeginnerController.AddDataFromExcel();
+                break;
+            case "Excel: Dynamic Import":
+                await _anyExcelReadController.AddDynamicDataFromExcel();
+                break;
+            case "Excel: Write":
+                await _excelWriteController.UpdateExcelAndDatabaseAsync();
+                break;
+            case "CSV: Import":
+                await _csvController.AddDataFromCsv();
+                break;
+            case "PDF: Import":
+                await _pdfController.AddDataFromPdf();
+                break;
+            case "PDF: Form Import":
+                await _pdfFormController.AddOrUpdateDataFromPdfForm();
+                break;
+            case "PDF: Form Write":
+                await _pdfFormWriteController.UpdatePdfFormAndDatabaseAsync();
+                break;
+        }
     }
 }

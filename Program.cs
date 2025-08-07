@@ -1,14 +1,21 @@
 ﻿using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Common;
+using ExcelReader.RyanW84.Abstractions.Core;
+using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
+using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Writers;
+using ExcelReader.RyanW84.Abstractions.Services;
 using ExcelReader.RyanW84.Controller;
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Helpers;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UserInterface;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Data;
 
 namespace ExcelReader.RyanW84
 {
@@ -20,15 +27,14 @@ namespace ExcelReader.RyanW84
             using var scope = host.Services.CreateScope();
             var services = scope.ServiceProvider;
             // Ensure database is created
-            var context = services.GetRequiredService<ExcelReaderDbContext>();
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-            // Show main menu
+            var context = services.GetRequiredService<IExcelReaderDbContext>();
+            context.EnsureDeleted();
+            context.EnsureCreated();
+
+            // Show main menu - updated to match cleaned MainMenuUI constructor
             var mainMenu = new MainMenuUI(
                 services.GetRequiredService<ExcelWriteController>(),
-                services.GetRequiredService<IAnyExcelReader>(),
                 services.GetRequiredService<PdfFormWriteController>(),
-                services.GetRequiredService<IPdfFormReader>(),
                 services.GetRequiredService<CsvController>(),
                 services.GetRequiredService<AnyExcelReadController>(),
                 services.GetRequiredService<ExcelBeginnerController>(),
@@ -51,6 +57,10 @@ namespace ExcelReader.RyanW84
                             options.UseSqlServer(connectionString)
                         );
                         
+                        // Register the interface mapping for IExcelReaderDbContext
+                        services.AddScoped<IExcelReaderDbContext>(provider => 
+                            provider.GetRequiredService<ExcelReaderDbContext>());
+                        
                         // Controllers
                         services.AddScoped<ExcelBeginnerController>();
                         services.AddScoped<AnyExcelReadController>();
@@ -71,23 +81,26 @@ namespace ExcelReader.RyanW84
                         services.AddScoped<IDataTableService, DictionaryToDataTableConverter>();
                         services.AddScoped<IExcelWriteService, WriteToExcelService>();
                         
+                        // Data converter registration - replace 'CsvDataConverter' with your actual implementation class name
+                        services.AddScoped<IDataConverter<List<string[]>, DataTable>, CsvToDataTableConverter>();
+
                         // File Reading Services with interfaces
-                        services.AddScoped<ICsvFileReader, ReadFromCsv>(); // Implemented
-                        services.AddScoped<IAnyExcelReader, AnyExcelRead>(); // Already implemented
-                        services.AddScoped<IPdfTableReader, ReadFromPdf>(); // Implemented
-                        services.AddScoped<IPdfFormReader, ReadFromPdfForm>(); // Already implemented
+                        services.AddScoped<IAnyExcelReader, AnyExcelRead>(); 
+                        services.AddScoped<IPdfTableReader, ReadFromPdf>(); 
+                        services.AddScoped<IPdfFormReader, ReadFromPdfForm>(); 
+                        services.AddScoped<ICsvFileReader, CsvFileReader>();
                         
                         // File Writing Services with interfaces
-                        services.AddScoped<IPdfFormWriter, WriteToPdfForm>(); // Implemented
+                        services.AddScoped<IPdfFormWriter, WriteToPdfForm>(); 
                         
-                        // Table Creation Services - TODO: Create interfaces for these
-                        services.AddScoped<CreateTableFromCSV>(); // TODO: ICsvTableCreator
-                        services.AddScoped<CreateTableFromAnyExcel>(); // TODO: IExcelTableCreator
-                        services.AddScoped<CreateTableFromPdfForm>(); // TODO: IPdfFormTableCreator
+                        // Table Creation Services
+                        services.AddScoped<ICsvTableCreator, CreateTableFromCSV>(); 
+                        services.AddScoped<IExcelTableCreator, CreateTableFromAnyExcel>(); 
+                        services.AddScoped<IPdfFormTableCreator, CreateTableFromPdfForm>(); 
                         
                         // Database Services with interfaces
-                        services.AddScoped<WritePdfFormDataToDatabaseService>(); // TODO: IPdfFormDatabaseService
-                        services.AddScoped<IExcelDatabaseService, WriteUpdatedExcelDataToDatabase>(); // Implemented
+                        services.AddScoped<IPdfFormDatabaseService, WritePdfFormDataToDatabaseService>(); 
+                        services.AddScoped<IExcelDatabaseService, WriteUpdatedExcelDataToDatabase>(); 
                     }
                 );
     }

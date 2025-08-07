@@ -1,6 +1,8 @@
 using System.Data;
 using System.Data.SqlClient;
-using ExcelReader.RyanW84.Abstractions;
+
+using ExcelReader.RyanW84.Abstractions.Core;
+
 using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Helpers;

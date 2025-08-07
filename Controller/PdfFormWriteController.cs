@@ -4,14 +4,19 @@ using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Services;
 using ExcelReader.RyanW84.UserInterface;
 using Microsoft.Extensions.Configuration;
-using ExcelReader.RyanW84.Abstractions;
 using ExcelReader.RyanW84.Helpers;
+using ExcelReader.RyanW84.Abstractions.Services;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Writers;
+using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
+using ExcelReader.RyanW84.Abstractions.Core;
+using ExcelReader.RyanW84.Abstractions.Common;
 
 namespace ExcelReader.RyanW84.Controller;
 
 public class PdfFormWriteController(
     IConfiguration configuration,
-    ExcelReaderDbContext dbContext,
+    IExcelReaderDbContext dbContext,
     IPdfFormReader readFromPdfForm,
     IPdfFormWriter writeToPdfForm,
     IPdfFormDatabaseService writePdfFormDataToDatabaseService,
@@ -22,7 +27,7 @@ public class PdfFormWriteController(
 )
 {
     private readonly IConfiguration _configuration = configuration;
-    private readonly ExcelReaderDbContext _dbContext = dbContext;
+    private readonly IExcelReaderDbContext _dbContext = dbContext;
     private readonly IPdfFormWriter _writeToPdfForm = writeToPdfForm;
     private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm;
     private readonly IPdfFormDatabaseService _writePdfFormDataToDatabaseService =
@@ -38,7 +43,7 @@ public class PdfFormWriteController(
         try
         {
 			// 1. Get file path from user via FilePathManager
-			var customDefault = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\TablePDF.pdf";
+			var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
 			var filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
 
 			// 2. Get existing field values from PDF

@@ -1,16 +1,25 @@
 using System.Data;
 
+using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace ExcelReader.RyanW84.Helpers;
 
-public class CreateTableFromAnyExcel(IConfiguration configuration)
+public class CreateTableFromAnyExcel : IExcelTableCreator
 {
+    private readonly IConfiguration _configuration;
+
+    public CreateTableFromAnyExcel(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     public void CreateTableFromExcel(DataTable dataTable)
     {
         var tableName = $"{dataTable.TableName}";
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = _configuration.GetConnectionString("DefaultConnection");
         using (var connection = new SqlConnection(connectionString))
         {
             connection.Open();

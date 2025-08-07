@@ -1,6 +1,8 @@
-using ExcelReader.RyanW84.Abstractions;
+using ExcelReader.RyanW84.Abstractions.Services;
+
 using Spectre.Console;
-using FileType = ExcelReader.RyanW84.Abstractions.FileType;
+
+using FileType = ExcelReader.RyanW84.Abstractions.Common.FileType;
 
 namespace ExcelReader.RyanW84.Helpers;
 

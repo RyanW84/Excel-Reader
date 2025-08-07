@@ -6,9 +6,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ExcelReader.RyanW84.Data
 {
-    public class ExcelReaderDbContext(DbContextOptions<ExcelReaderDbContext> options) : DbContext(options)
+    public class ExcelReaderDbContext(DbContextOptions<ExcelReaderDbContext> options) : DbContext(options), IExcelReaderDbContext
     {
 		public DbSet<ExcelBeginner> ExcelBeginner { get; set; }
+
+        // Implement IExcelReaderDbContext methods
+        public void EnsureDeleted()
+        {
+            Database.EnsureDeleted();
+        }
+
+        public void EnsureCreated()
+        {
+            Database.EnsureCreated();
+        }
 
         public static ILoggerFactory GetLoggerFactory()
         {
@@ -44,7 +55,7 @@ namespace ExcelReader.RyanW84.Data
         {
             var optionsBuilder = new DbContextOptionsBuilder<ExcelReaderDbContext>();
             optionsBuilder.UseSqlServer(
-                "Server=(localdb)\\MSSQLlocaldb; Database=ExcelReader; Integrated Security=True; MultipleActiveResultSets=True;")
+                @"Server=(localdb)\MSSQLlocaldb; Database=ExcelReader; Integrated Security=True; MultipleActiveResultSets=True;")
                 .EnableSensitiveDataLogging()
                 .UseLoggerFactory(ExcelReaderDbContext.GetLoggerFactory());
 

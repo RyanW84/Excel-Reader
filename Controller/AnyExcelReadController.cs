@@ -1,26 +1,22 @@
+﻿using ExcelReader.RyanW84.Abstractions.Data.TableCreators;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
 using ExcelReader.RyanW84.Data;
-using ExcelReader.RyanW84.Helpers;
-using ExcelReader.RyanW84.Services;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class AnyExcelReadController
+public class AnyExcelReadController(
+	IExcelReaderDbContext dbContext ,
+	IAnyExcelReader anyExcelReader ,
+	IExcelTableCreator createTableFromExcel)
 {
-    private readonly ExcelReaderDbContext _dbContext;
-    private readonly AnyExcelRead _anyExcelRead;
-    private readonly CreateTableFromAnyExcel _createTableFromAnyExcel;
+	private readonly IExcelReaderDbContext _dbContext = dbContext;
+	private readonly IAnyExcelReader _anyExcelReader = anyExcelReader;
+	private readonly IExcelTableCreator _createTableFromExcel = createTableFromExcel;
 
-    public AnyExcelReadController(ExcelReaderDbContext dbContext, AnyExcelRead anyExcelRead, CreateTableFromAnyExcel createTableFromAnyExcel)
-    {
-        _dbContext = dbContext;
-        _anyExcelRead = anyExcelRead;
-        _createTableFromAnyExcel = createTableFromAnyExcel;
-    }
-
-    public async Task AddDynamicDataFromExcel()
-    {
-        var dataTable = await _anyExcelRead.ReadFromExcelAsync();
-        _createTableFromAnyExcel.CreateTableFromExcel(dataTable);
-        await _dbContext.SaveChangesAsync();
-    }
+	public async Task AddDynamicDataFromExcel()
+	{
+		var dataTable = await _anyExcelReader.ReadFromExcelAsync();
+		_createTableFromExcel.CreateTableFromExcel(dataTable);
+		await _dbContext.SaveChangesAsync();
+	}
 }

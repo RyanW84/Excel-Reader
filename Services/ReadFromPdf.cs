@@ -5,6 +5,9 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using System.Text.RegularExpressions;
+using ExcelReader.RyanW84.Abstractions.Services;
+using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
+using ExcelReader.RyanW84.Abstractions.Common;
 
 namespace ExcelReader.RyanW84.Abstractions;
 
