@@ -123,15 +123,15 @@ The application uses `appsettings.json` for configuration:
 - **Logging** - Logging level configuration
 
 ## Project Structure
-├── Abstractions/          # Interface definitions
-├── Controller/            # Business logic controllers
-├── Data/                 # Database context and models
-├── Helpers/              # Utility classes
-├── Models/               # Data models
-├── Repositories/         # Data access layer
-├── Services/            # Business services
-├── UserInterface/       # Console UI components
-└── Program.cs           # Application entry point
+├── Abstractions/          # Interface definitions. 
+├── Controller/            # Business logic controllers. 
+├── Data/                 # Database context and models. 
+├── Helpers/              # Utility classes. 
+├── Models/               # Data models. 
+├── Repositories/         # Data access layer. 
+├── Services/            # Business services. 
+├── UserInterface/       # Console UI components. 
+└── Program.cs           # Application entry point. 
 
 ## License
 
