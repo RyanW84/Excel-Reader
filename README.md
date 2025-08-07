@@ -1,4 +1,4 @@
-﻿# ExcelReader.RyanW84
+﻿# File Reader (AKA Excel Reader)
 
 A comprehensive .NET 9 console application for reading and writing various file formats including Excel, CSV, and PDF files. The application provides a user-friendly console interface for importing data from different file types and managing database operations.
 
