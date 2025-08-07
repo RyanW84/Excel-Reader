@@ -7,18 +7,40 @@ using ExcelReader.RyanW84.Abstractions.Common;
 
 namespace ExcelReader.RyanW84.Services;
 
-public class AnyExcelRead(IFilePathService filePathManager , INotificationService userNotifier) : IAnyExcelReader
+public class AnyExcelRead(IFilePathService filePathManager, INotificationService userNotifier) : IAnyExcelReader
 {
     private readonly IFilePathService _filePathManager = filePathManager;
     private readonly INotificationService _userNotifier = userNotifier;
 
-	public async Task<DataTable> ReadFromExcelAsync()
+    // Original methods for backward compatibility
+    public async Task<DataTable> ReadFromExcelAsync()
     {
         string filePath;
         try
-		{
-			var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.Xlsx";
-			filePath = _filePathManager.GetFilePath(FileType.Excel, customDefault);
+        {
+            var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.Xlsx";
+            filePath = _filePathManager.GetFilePath(FileType.Excel, customDefault);
+        }
+        catch (FilePathValidationException ex)
+        {
+            _userNotifier.ShowError($"Excel file path error: {ex.Message}");
+            return new DataTable();
+        }
+
+        return await ReadFromExcelAsync(filePath);
+    }
+
+    public DataTable ReadFromExcel()
+    {
+        return ReadFromExcelAsync().GetAwaiter().GetResult();
+    }
+
+    // New method - uses provided file path
+    public async Task<DataTable> ReadFromExcelAsync(string filePath)
+    {
+        try
+        {
+            _filePathManager.ValidateFilePath(filePath, FileType.Excel);
         }
         catch (FilePathValidationException ex)
         {
@@ -109,9 +131,10 @@ public class AnyExcelRead(IFilePathService filePathManager , INotificationServic
         });
     }
 
-    // Keep synchronous version for backward compatibility
-    public DataTable ReadFromExcel()
+  
+    // New synchronous overload that accepts file path
+    public DataTable ReadFromExcel(string filePath)
     {
-        return ReadFromExcelAsync().GetAwaiter().GetResult();
+        return ReadFromExcelAsync(filePath).GetAwaiter().GetResult();
     }
 }

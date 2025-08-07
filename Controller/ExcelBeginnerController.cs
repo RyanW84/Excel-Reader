@@ -1,29 +1,24 @@
 using System.Data;
+
+using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
 using ExcelReader.RyanW84.Abstractions.Services;
 using ExcelReader.RyanW84.Data;
 using ExcelReader.RyanW84.Models;
 
 namespace ExcelReader.RyanW84.Controller;
 
-public class ExcelBeginnerController
+public class ExcelBeginnerController(
+	IExcelBeginnerService excelBeginnerService ,
+	IExcelReaderDbContext dbContext ,
+	INotificationService userNotifier
+	)
 {
-    private readonly IExcelBeginnerService _excelBeginnerService;
-    private readonly IExcelReaderDbContext _dbContext;
-    private readonly INotificationService _userNotifier;
+    private readonly IExcelBeginnerService _excelBeginnerService = excelBeginnerService;
+    private readonly IExcelReaderDbContext _dbContext = dbContext;
+    private readonly INotificationService _userNotifier = userNotifier;
 
-    public ExcelBeginnerController(
-        IExcelBeginnerService excelBeginnerService,
-        IExcelReaderDbContext dbContext,
-        INotificationService userNotifier
-    )
-    {
-        _excelBeginnerService = excelBeginnerService;
-        _dbContext = dbContext;
-        _userNotifier = userNotifier;
-    }
-
-    // Orchestrator method for all steps
-    public async Task AddDataFromExcel()
+	// Orchestrator method for all steps
+	public async Task AddDataFromExcel()
     {
         // 1. Read data from Excel file
         var dataTable = _excelBeginnerService.ReadFromExcel();

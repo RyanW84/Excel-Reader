@@ -34,11 +34,11 @@ public class ExcelWriteController(
         {
             // 1. Get file path from user via FilePathManager
             // Use a custom default path for Excel files
-            var customDefault = @"C:\\Users\\Ryanw\\OneDrive\\Documents\\GitHub\\Excel-Reader\\Data\\ExcelDynamic.Xlsx";
+            var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\\Excel-Reader\Data\ExcelDynamic.Xlsx";
             var filePath = _filePathManager.GetFilePath(FileType.Excel,customDefault);
 
-            // 2. Get existing field values from Excel
-            var table = await _anyExcelRead.ReadFromExcelAsync();
+            // 2. Get existing field values from Excel using the obtained file path
+            var table = await _anyExcelRead.ReadFromExcelAsync(filePath);
             if (table == null || table.Rows.Count == 0)
             {
                 _userNotifier.ShowError("No data found in the Excel file.");

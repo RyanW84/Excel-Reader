@@ -1,2 +1,15 @@
-// This file has been moved to Data/IExcelReaderDbContext.cs
-// Content removed to avoid duplicate definitions
+using ExcelReader.RyanW84.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
+
+namespace ExcelReader.RyanW84.Abstractions.Data.DatabaseServices
+{
+    public interface IExcelReaderDbContext
+    {
+        DbSet<ExcelBeginner> ExcelBeginner { get; set; }
+        
+        void EnsureDeleted();
+        void EnsureCreated();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    }
+}
