@@ -87,17 +87,16 @@ The following NuGet packages are used in this project:
 
 ## Installation
 
-1. Clone the repository
+1. Clone the repository "git clone https://github.com/RyanW84/ExcelReader.RyanW84.git cd ExcelReader.RyanW84"
 2. Restore NuGet packages using the following command:
    "dotnet restore"
-3. Update the database connection string in `appsettings.json` if needed
-4. **Apply database migrations** (if using migrations approach):
- "dotnet ef database update"
-5. Or using Package Manager Console in Visual Studio:
-Open Package Manager Console and run "Update-Database"
-6. Build the solution:
+3. **Configure Database** (Optional)
+   - Update connection string in `appsettings.json` if needed
+   - Default uses SQL Server LocalDB: `(localdb)\\MSSQLlocaldb`
+
+	4. **Build the solution:**
    "dotnet build"
-7. Run the application:
+5. Run the application:
    "dotnet run"
    Ensure the Excel file is present in the project directory for import functionality
 
@@ -153,15 +152,22 @@ When you run the application, you'll see an interactive menu:
 - **Logging** - Adjust logging levels as per your debugging needs
 
 ## Project Structure
-├── Abstractions/        # Interface definitions<br>
-├── Controller/          # Business logic controllers<br>
-├── Data/                # Database context and models<br>
-├── Helpers/             # Utility classes<br>
-├── Models/              # Data models<br>
-├── Repositories/        # Data access layer<br>
-├── Services/            # Business services<br>
-├── UserInterface/       # Console UI components<br>
-└── Program.cs           # Application entry point<br>
+ExcelReader.RyanW84/ 
+├── 📁 Abstractions/           # Interface definitions and contracts 
+│   ├── 📁 Base/              # Base interfaces (IRepository, IFileReader) <br>
+│   ├── 📁 Common/            # Common abstractions (FileType, Validation) <br>
+│   ├── 📁 Core/              # Core interfaces (IDataConverter, ITableManager) <br>
+│   ├── 📁 Data/              # Data layer interfaces <br>
+│   ├── 📁 FileOperations/    # File operation interfaces <br>
+│   └── 📁 Services/          # Service layer interfaces <br>
+├── 📁 Controller/            # MVC-style controllers for business logic <br>
+├── 📁 Data/                  # Entity Framework context and configurations <br>
+├── 📁 Helpers/               # Utility classes and extension methods <br>
+├── 📁 Models/                # Data models and entities <br>
+├── 📁 Services/              # Business logic implementations <br>
+├── 📁 UserInterface/         # Console UI components <br>
+├── 📄 Program.cs             # Application entry point and DI configuration <br>
+└── 📄 appsettings.json       # Application configuration<br>
 
 ## 🧪 Key Design Features
 
@@ -172,9 +178,9 @@ When you run the application, you'll see an interactive menu:
 
 ### Performance Optimizations
 - **Async/Await** throughout the application
-- **Bulk Database Operations** for large datasets
+- **Bulk Database Operations** for large datasets  
 - **Memory-efficient** file processing
-- **Connection Pooling** for database operations
+- **Connection Pooling** via Entity Framework Core and ADO.NET defaults
 
 ### Code Quality
 - **SOLID Principles** adherence
@@ -217,6 +223,8 @@ This project was built with the help of the following resources and tutorials:
 ---
 
 ⭐ **If this project helped you learn something new, please give it a star!** ⭐
+
+
 
 
 

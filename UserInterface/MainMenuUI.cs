@@ -104,8 +104,8 @@ public class MainMenuUI(
                 await _pdfController.AddDataFromPdf();
                 break;
             case "PDF: Form Import":
-                await _pdfFormController.AddOrUpdateDataFromPdfForm();
-                break;
+                await _pdfFormController.ImportDataFromPdfForm();
+				break;
             case "PDF: Form Write":
                 await _pdfFormWriteController.UpdatePdfFormAndDatabaseAsync();
                 break;

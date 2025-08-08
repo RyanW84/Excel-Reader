@@ -15,7 +15,7 @@ public class FilePathManager : IFilePathService
     {
         { FileType.Excel, @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelDynamic.xlsx" },
         { FileType.PDF, @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf" },
-        { FileType.CSV, @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\Sample.csv" }
+        { FileType.CSV, @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\ExcelCSV.csv" }
     };
 
     /// <summary>

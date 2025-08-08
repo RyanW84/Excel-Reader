@@ -3,67 +3,54 @@
 using ExcelReader.RyanW84.Abstractions.Common;
 using ExcelReader.RyanW84.Abstractions.Data.DatabaseServices;
 using ExcelReader.RyanW84.Abstractions.FileOperations.Readers;
-using ExcelReader.RyanW84.Abstractions.FileOperations.Writers;
 using ExcelReader.RyanW84.Abstractions.Services;
 using ExcelReader.RyanW84.Helpers;
 
 namespace ExcelReader.RyanW84.Controller;
 
+/// <summary>
+/// Controller for importing PDF form data (read-only operations)
+/// </summary>
 public class PdfFormController(
-    IPdfFormReader readFromPdfForm,
-    IPdfFormWriter writeToPdfForm,
-    IPdfFormDatabaseService writePdfFormDataToDatabaseService,
-    IFieldInputService fieldInputUi,
-    IFilePathService filePathManager,
-    INotificationService notificationService
-)
+	IPdfFormReader readFromPdfForm ,
+	IPdfFormDatabaseService writePdfFormDataToDatabaseService ,
+	IFilePathService filePathManager ,
+	IExcelReaderDbContext dbContext ,
+	INotificationService notificationService) : DataImportControllerBase(dbContext, notificationService)
 {
-    private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm;
-    private readonly IPdfFormWriter _writeToPdfForm = writeToPdfForm;
-    private readonly IPdfFormDatabaseService _writePdfFormDataToDatabaseService =
-        writePdfFormDataToDatabaseService;
-    private readonly IFieldInputService _fieldInputUi = fieldInputUi;
-    private readonly IFilePathService _filePathManager = filePathManager;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IPdfFormReader _readFromPdfForm = readFromPdfForm ?? throw new ArgumentNullException(nameof(readFromPdfForm));
+    private readonly IPdfFormDatabaseService _writePdfFormDataToDatabaseService = writePdfFormDataToDatabaseService ?? throw new ArgumentNullException(nameof(writePdfFormDataToDatabaseService));
+    private readonly IFilePathService _filePathManager = filePathManager ?? throw new ArgumentNullException(nameof(filePathManager));
 
-    public async Task AddOrUpdateDataFromPdfForm()
+	/// <summary>
+	/// Imports PDF form data to database (read-only operation)
+	/// </summary>
+	public async Task ImportDataFromPdfForm()
     {
-        // 1. Get the file path using FilePathManager
-
-        string filePath;
-        try
+        await ExecuteOperationAsync(async () =>
         {
-            var customDefault =
-                @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
-            filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
-        }
-        catch (FilePathValidationException ex)
-        {
-            _notificationService.ShowError($"PDF file path error: {ex.Message}");
-            return;
-        }
+            // 1. Get the file path using FilePathManager
+            var customDefault = @"C:\Users\Ryanw\OneDrive\Documents\GitHub\Excel-Reader\Data\FillablePDF.pdf";
+            var filePath = _filePathManager.GetFilePath(FileType.PDF, customDefault);
 
-        // 2. Read existing fields from PDF
-        var fields = await _readFromPdfForm.ReadFormFieldsAsync(filePath);
-        if (fields.Count == 0)
-        {
-            _notificationService.ShowError("No form fields found or file not found.");
-            return;
-        }
+            // 2. Read existing fields from PDF (read-only)
+            NotificationService.ShowInfo("Reading PDF form fields...");
+            var fields = await _readFromPdfForm.ReadFormFieldsAsync(filePath);
+            
+            if (fields.Count == 0)
+            {
+                NotificationService.ShowError("No form fields found or file not found.");
+                return;
+            }
 
-        // 3. Pass fields to unified UI for user to update
-        // Async usage:
-        var updatedFields = await _fieldInputUi.GatherUpdatedFieldsAsync(fields, FileType.PDF);
+            NotificationService.ShowInfo($"Found {fields.Count} form fields in PDF.");
 
-        // Or backward compatible:
-        // var updatedFields = _fieldInputUi.GatherUpdatedFields(fields, FieldInputUi.FileType.PDF);
+            // 3. Import data directly to database without modification
+            NotificationService.ShowInfo("Importing PDF form data to database...");
+            await _writePdfFormDataToDatabaseService.WriteAsync(fields);
+            await SaveChangesAsync();
 
-        // 4. Write updated fields back to PDF form
-        await _writeToPdfForm.WriteFormFieldsAsync(filePath, updatedFields);
-
-        // 5. Add updated data to the database
-        await _writePdfFormDataToDatabaseService.WriteAsync(updatedFields);
-
-        _notificationService.ShowSuccess("PDF form updated and data imported to SQL table.");
+            NotificationService.ShowSuccess($"PDF form data imported successfully! Imported {fields.Count} fields.");
+        }, "PDF form import");
     }
 }
