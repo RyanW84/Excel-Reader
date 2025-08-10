@@ -152,10 +152,10 @@ When you run the application, you'll see an interactive menu:
 - **Logging** - Adjust logging levels as per your debugging needs
 
 ## Project Structure
-ExcelReader.RyanW84/ 
-├── 📁 Abstractions/ # Interface definitions and contracts<br>
-│   ├── 📁 Base/     # Base interfaces (IRepository,IFileReader)<br>
-│   ├── 📁 Common/ # Common abstractions (FileType,Validation) <br>
+ExcelReader<br>
+├── 📁 Abstractions -Interface definitions and contracts<br>
+│   ├── 📁 Base     -Base (IRepository,IFileReader)<br>
+│   ├── 📁 Common -Common abstractions (FileType,Validation) <br>
 │   ├── 📁 Core/              # Core interfaces (IDataConverter, ITableManager) <br>
 │   ├── 📁 Data/              # Data layer interfaces <br>
 │   ├── 📁 FileOperations/    # File operation interfaces <br>
