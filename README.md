@@ -153,9 +153,9 @@ When you run the application, you'll see an interactive menu:
 
 ## Project Structure
 ExcelReader.RyanW84/ 
-├── 📁 Abstractions/           # Interface definitions and contracts 
-│   ├── 📁 Base/              # Base interfaces (IRepository, IFileReader) <br>
-│   ├── 📁 Common/            # Common abstractions (FileType, Validation) <br>
+├── 📁 Abstractions/ # Interface definitions and contracts<br>
+│   ├── 📁 Base/     # Base interfaces (IRepository,IFileReader)<br>
+│   ├── 📁 Common/ # Common abstractions (FileType,Validation) <br>
 │   ├── 📁 Core/              # Core interfaces (IDataConverter, ITableManager) <br>
 │   ├── 📁 Data/              # Data layer interfaces <br>
 │   ├── 📁 FileOperations/    # File operation interfaces <br>
